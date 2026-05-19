@@ -1,0 +1,239 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pharosflow Developer API",
+    "description": "Production-grade cross-chain intent routing and execution API for the Pharos Network. Route, sign, and execute bridging intents across 7+ bridges with MEV protection and RWA compliance.",
+    "version": "1.1.0",
+    "contact": {
+      "name": "Pharosflow Labs",
+      "url": "https://pharosflow.net",
+      "email": "dev@pharosflow.net"
+    },
+    "license": { "name": "MIT" }
+  },
+  "servers": [
+    { "url": "https://api.pharosflow.net", "description": "Production" },
+    { "url": "http://localhost:3000", "description": "Local Development" }
+  ],
+  "security": [{ "ApiKeyAuth": [] }],
+  "tags": [
+    { "name": "Routing",    "description": "Cross-chain route calculation" },
+    { "name": "Execution",  "description": "Intent submission and bundling" },
+    { "name": "Tracking",   "description": "Bridge delivery status" },
+    { "name": "Compliance", "description": "KYC/AML address screening" },
+    { "name": "Webhooks",   "description": "Delivery notification subscriptions" },
+    { "name": "System",     "description": "Health and diagnostics" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-pharosflow-api-key",
+        "description": "Your Pharosflow API key. Obtain via /v1/admin/generate-key."
+      }
+    },
+    "schemas": {
+      "Token": {
+        "type": "object",
+        "properties": {
+          "address":  { "type": "string", "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+          "chainId":  { "type": "integer", "example": 1 },
+          "symbol":   { "type": "string",  "example": "USDC" },
+          "decimals": { "type": "integer", "example": 6 },
+          "name":     { "type": "string",  "example": "USD Coin" }
+        }
+      },
+      "Hop": {
+        "type": "object",
+        "properties": {
+          "fromChain":       { "type": "integer", "example": 1 },
+          "toChain":         { "type": "integer", "example": 688688 },
+          "fromToken":       { "$ref": "#/components/schemas/Token" },
+          "toToken":         { "$ref": "#/components/schemas/Token" },
+          "venue":           { "type": "string", "enum": ["pharos_spn","layerzero","chainlink_ccip","circle_cctp","axelar","wormhole","debridge","pharos-native","dex_pool"], "example": "debridge" },
+          "estimatedOutput": { "type": "string", "example": "997000000" },
+          "estimatedGas":    { "type": "string", "example": "250000" },
+          "slippageBps":     { "type": "integer", "example": 20 },
+          "latencyMs":       { "type": "integer", "example": 1100 },
+          "bridgeFee":       { "type": "string", "example": "2000000" }
+        }
+      },
+      "RouteRequest": {
+        "type": "object",
+        "required": ["fromChain","toChain","fromToken","toToken","amountIn"],
+        "properties": {
+          "fromChain":            { "type": "integer", "example": 1,     "description": "Source EVM chain ID" },
+          "toChain":              { "type": "integer", "example": 688688, "description": "Destination EVM chain ID" },
+          "fromToken":            { "type": "string",  "example": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", "description": "Token address on source chain" },
+          "toToken":              { "type": "string",  "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", "description": "Token address on destination chain" },
+          "amountIn":             { "type": "string",  "example": "1000000000000000000", "description": "Amount in wei (as decimal string)" },
+          "slippageToleranceBps": { "type": "integer", "example": 50, "description": "Max acceptable slippage in basis points (50 = 0.5%)" },
+          "userAddress":          { "type": "string",  "example": "0xAbCdEf1234567890AbCdEf1234567890AbCdEf12", "description": "Sender address — required to generate intentPayload" }
+        }
+      },
+      "BridgingIntent": {
+        "type": "object",
+        "required": ["sourceUserAddress","destinationUserAddress","sourceToken","destinationToken","amountIn","minAmountOut","targetChainId","deadline"],
+        "properties": {
+          "sourceUserAddress":      { "type": "string",  "example": "0xAbCd..." },
+          "destinationUserAddress": { "type": "string",  "example": "0xAbCd..." },
+          "sourceToken":            { "type": "string",  "example": "0xC02a..." },
+          "destinationToken":       { "type": "string",  "example": "0xA0b8..." },
+          "amountIn":               { "type": "string",  "example": "1000000000000000000", "description": "Wei as decimal string" },
+          "minAmountOut":           { "type": "string",  "example": "995000000", "description": "Minimum acceptable output (slippage floor)" },
+          "targetChainId":          { "type": "integer", "example": 688688 },
+          "deadline":               { "type": "integer", "example": 1746825600, "description": "Unix timestamp — intent expires after this time" },
+          "signature":              { "type": "string",  "description": "EIP-712 signature. Required for /v1/execute." }
+        }
+      },
+      "RouteResponse": {
+        "type": "object",
+        "properties": {
+          "amountIn":          { "type": "string", "example": "1000000000000000000" },
+          "expectedOutput":    { "type": "string", "example": "997000000" },
+          "totalGasEstimated": { "type": "string", "example": "500000" },
+          "priceImpactBps":    { "type": "integer", "example": 20 },
+          "hops":              { "type": "array", "items": { "$ref": "#/components/schemas/Hop" } },
+          "intentPayload":     { "$ref": "#/components/schemas/BridgingIntent" }
+        }
+      },
+      "ExecutionResponse": {
+        "type": "object",
+        "properties": {
+          "intentHash": { "type": "string", "example": "0xabc..." },
+          "status":     { "type": "string", "example": "bundled_and_sent" }
+        }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "properties": {
+          "trackingHash":       { "type": "string" },
+          "status":             { "type": "string", "enum": ["PENDING","BROADCASTING","DELIVERED","FAILED"] },
+          "bridgeVenue":        { "type": "string" },
+          "sourceChainId":      { "type": "integer" },
+          "destinationChainId": { "type": "integer" },
+          "amount":             { "type": "string" },
+          "feeCollected":       { "type": "string" },
+          "errorMessage":       { "type": "string" },
+          "createdAt":          { "type": "string", "format": "date-time" },
+          "updatedAt":          { "type": "string", "format": "date-time" }
+        }
+      },
+      "ComplianceResponse": {
+        "type": "object",
+        "properties": {
+          "address":         { "type": "string" },
+          "chainId":         { "type": "integer" },
+          "isKYCed":         { "type": "boolean" },
+          "amlRisk":         { "type": "number", "description": "0.0–1.0 risk score" },
+          "isRwa":           { "type": "boolean" },
+          "requiredBridges": { "type": "array", "items": { "type": "string" } },
+          "jurisdictions":   { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status":     { "type": "string", "enum": ["ok","degraded"] },
+          "apiGateway": { "type": "string" },
+          "db":         { "type": "string" },
+          "redis":      { "type": "string" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "example": "Invalid API key" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/v1/quote": {
+      "post": {
+        "summary": "Get optimal cross-chain route",
+        "description": "Runs Dijkstra's algorithm over the live liquidity graph to find the optimal multi-hop cross-chain route. Returns the route details, estimated output, price impact, and a pre-formed intentPayload for the user to sign.",
+        "tags": ["Routing"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RouteRequest" } } }
+        },
+        "responses": {
+          "200": { "description": "Route found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RouteResponse" } } } },
+          "400": { "description": "Invalid parameters", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "404": { "description": "No route found between the specified tokens/chains" },
+          "429": { "description": "Rate limit exceeded" },
+          "503": { "description": "Router service unavailable" }
+        }
+      }
+    },
+    "/v1/execute": {
+      "post": {
+        "summary": "Execute a signed bridging intent",
+        "description": "Submits a signed BridgingIntent to the L3 Executor cluster for ERC-4337 bundling and on-chain execution. The intent must be signed with EIP-712 before submission.",
+        "tags": ["Execution"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["intent"],
+                "properties": { "intent": { "$ref": "#/components/schemas/BridgingIntent" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Intent submitted", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ExecutionResponse" } } } },
+          "400": { "description": "Missing intent or signature" },
+          "503": { "description": "Executor unavailable" }
+        }
+      }
+    },
+    "/v1/status/{trackingHash}": {
+      "get": {
+        "summary": "Get bridge delivery status",
+        "description": "Returns the current delivery status for a submitted intent. Poll this endpoint or use webhooks for delivery notification.",
+        "tags": ["Tracking"],
+        "parameters": [{
+          "name": "trackingHash", "in": "path", "required": true,
+          "schema": { "type": "string" }, "description": "Transaction hash returned by /v1/execute"
+        }],
+        "responses": {
+          "200": { "description": "Status data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StatusResponse" } } } },
+          "404": { "description": "Tracking hash not found" }
+        }
+      }
+    },
+    "/v1/compliance/{address}": {
+      "get": {
+        "summary": "Check KYC/AML compliance for an address",
+        "description": "Returns KYC status, AML risk score, and RWA classification for a given address. Used by the router to enforce compliant bridge selection for tokenized real-world assets.",
+        "tags": ["Compliance"],
+        "parameters": [
+          { "name": "address", "in": "path",  "required": true, "schema": { "type": "string" }, "description": "EVM address (0x...)" },
+          { "name": "chainId", "in": "query", "required": false, "schema": { "type": "integer", "default": 1 }, "description": "Chain ID for the address context" }
+        ],
+        "responses": {
+          "200": { "description": "Compliance data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ComplianceResponse" } } } },
+          "400": { "description": "Invalid address format" },
+          "404": { "description": "No compliance data found for this address" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns the operational status of the API gateway, database, and Redis connections.",
+        "tags": ["System"],
+        "security": [],
+        "responses": {
+          "200": { "description": "All systems operational", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } } } },
+          "500": { "description": "One or more dependencies degraded" }
+        }
+      }
+    }
+  }
+}

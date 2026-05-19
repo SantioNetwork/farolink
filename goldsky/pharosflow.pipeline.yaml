@@ -1,0 +1,83 @@
+# PharosFlow — Goldsky Mirror Pipeline (Combined)
+#
+# Single pipeline that streams BOTH:
+#   1. DEX Swap/Sync events → goldsky_liquidity
+#   2. SPN cross-chain message events → goldsky_spn
+#
+# This fits within Goldsky's free tier (1 pipeline limit).
+#
+# Deploy:
+#   goldsky pipeline apply goldsky/pharosflow.pipeline.yaml
+#
+# Monitor:
+#   goldsky pipeline status pharosflow
+
+apiVersion: 3
+name: pharosflow
+resource_size: s
+
+sources:
+  pharos_logs:
+    dataset_name: pharos_atlantic_testnet.raw_logs
+    version: 1.0.0
+    type: dataset
+    start_at: latest
+
+transforms:
+  # ── 1. DEX Liquidity: Uniswap V2 Sync + V3 Swap events ─────────────────
+  liquidity_events:
+    primary_key: id
+    sql: >
+      SELECT
+        id,
+        address                        AS pair_address,
+        246                            AS chain_id,
+        SPLIT_INDEX(topics, ',', 1)    AS token0,
+        SPLIT_INDEX(topics, ',', 2)    AS token1,
+        data                           AS raw_data,
+        0                              AS volume_24h,
+        block_timestamp                AS created_at
+      FROM pharos_logs
+      WHERE SPLIT_INDEX(topics, ',', 0) IN (
+        '0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1',
+        '0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67'
+      )
+
+  # ── 2. SPN Messages: MessageSent + MessageDelivered events ──────────────
+  spn_messages:
+    primary_key: id
+    sql: >
+      SELECT
+        id,
+        SPLIT_INDEX(topics, ',', 1)    AS message_id,
+        address                        AS sender,
+        0                              AS dest_chain_id,
+        CASE
+          WHEN SPLIT_INDEX(topics, ',', 0) = '0xb8e138887d0aa13bab447e82de9d5c1777d9cc7e9a87e9f6f9f891d359b2f37'
+          THEN 'DELIVERED'
+          ELSE 'PENDING'
+        END                            AS status,
+        0                              AS latency_ms,
+        block_timestamp                AS created_at
+      FROM pharos_logs
+      WHERE SPLIT_INDEX(topics, ',', 0) IN (
+        '0x4e41ee13e03cd5e0446487b524fdc48af6acf26c074dacdbdfb6303e763ba8f5',
+        '0xb8e138887d0aa13bab447e82de9d5c1777d9cc7e9a87e9f6f9f891d359b2f37'
+      )
+
+sinks:
+  # ── Sink 1: Liquidity → Neon Postgres ───────────────────────────────────
+  postgres_liquidity:
+    type: postgres
+    from: liquidity_events
+    schema: public
+    table: goldsky_liquidity
+    secret_name: PHAROSFLOW_PG
+
+  # ── Sink 2: SPN Messages → Neon Postgres ────────────────────────────────
+  postgres_spn:
+    type: postgres
+    from: spn_messages
+    schema: public
+    table: goldsky_spn
+    secret_name: PHAROSFLOW_PG

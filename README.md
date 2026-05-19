@@ -30,7 +30,7 @@ Pharos has deployed **22+ RWA tokens** (USDM, USDY, S-UST, AQ-TPC, P-stNova, etc
 
 PharosFlow solves this by:
 1. **Indexing every live DEX pool** on Pharos via Goldsky in real-time
-2. **Running Bellman-Ford pathfinding** across 109+ pool pairs on 7 chains
+2. **Running Dijkstra pathfinding** across 109+ pool pairs on 7 chains
 3. **Executing via EIP-712 signed intents** — users never touch gas
 4. **Enforcing RWA compliance** — regulated tokens (T-Bills, etc.) are locked to CCIP-only routes
 
@@ -48,8 +48,8 @@ User Wallet
 └──────────────────────┬──────────────────────────────┘
                        │ /route
 ┌──────────────────────▼──────────────────────────────┐
-│  Layer 2 — pharosflow-router  (:3000)               │
-│  Bellman-Ford pathfinder · x*y=k AMM math           │
+│  Layer 2 — pharosflow-router  (:3001)               │
+│  Dijkstra pathfinder · x*y=k AMM math               │
 │  109 pool pairs across 7 chains in Upstash Redis    │
 └──────────────────────┬──────────────────────────────┘
                        │ reserves feed
@@ -60,7 +60,7 @@ User Wallet
 └─────────────────────────────────────────────────────┘
                        │ execute
 ┌─────────────────────────────────────────────────────┐
-│  Layer 3 — pharosflow-executor  (:5000)             │
+│  Layer 3 — pharosflow-executor  (:3002)             │
 │  ERC-4337 UserOp bundler · Bridge adapters          │
 │  [Testnet Note: executor targets local Hardhat RPC  │
 │   pending bytecode size fix on Pharos Atlantic]     │
@@ -200,6 +200,68 @@ cd pharosflow-public/pharosflow-web && npm i && npm run dev
 
 ---
 
+## Deployment
+
+PharosFlow is deployed as a split architecture: **Vercel** for the frontend, **Railway** for all backend services.
+
+### Frontend → Vercel
+
+```bash
+# From the repository root on GitHub (santionetwork/pharosflow)
+# Vercel auto-detects the Vite framework
+
+# 1. Import project in Vercel dashboard
+#    → Root Directory: pharosflow-public/pharosflow-web
+#    → Framework: Vite
+
+# 2. Set environment variable:
+#    VITE_API_URL = https://pharosflow-api-production.up.railway.app
+```
+
+### Backend → Railway
+
+Each service is deployed as a separate Railway service in a single project, all linked via private networking:
+
+```bash
+# In Railway dashboard, create a new project, then add 4 services:
+
+# Service 1: API Gateway
+#   → Root Directory: pharosflow-core/pharosflow-api
+#   → Public networking: ON (this is the public endpoint)
+
+# Service 2: Router Engine
+#   → Root Directory: pharosflow-core/pharosflow-router
+#   → Public networking: OFF (internal only)
+
+# Service 3: Executor
+#   → Root Directory: pharosflow-public/pharosflow-executor
+#   → Public networking: OFF (internal only)
+
+# Service 4: Indexer
+#   → Root Directory: pharosflow-core/pharosflow-indexer
+#   → Public networking: OFF (internal only)
+
+# Add managed plugins: PostgreSQL + Redis
+```
+
+### Railway Environment Variables
+
+| Variable | Service | Value |
+|----------|---------|-------|
+| `DATABASE_URL` | API, Indexer | `${{Postgres.DATABASE_URL}}` (Railway ref) |
+| `REDIS_URL` | API, Router, Indexer | `${{Redis.REDIS_URL}}` (Railway ref) |
+| `ROUTER_API_URL` | API | `http://pharosflow-router.railway.internal:3001` |
+| `EXECUTOR_API_URL` | API | `http://pharosflow-executor.railway.internal:3002` |
+| `INTERNAL_SECRET` | API, Executor | Shared 32+ char secret |
+| `ADMIN_KEY_HASH` | API | SHA-256 of your master admin key |
+| `EXECUTOR_PRIVATE_KEY` | Executor | Hot wallet private key |
+| `RPC_URL` | Executor | `https://testnet.dplabs-internal.com` |
+| `PORT` | API: `4000`, Router: `3001`, Executor: `3002`, Indexer: `3001` |
+| `NODE_ENV` | All | `production` |
+| `ALLOWED_ORIGINS` | API | `https://pharosflow.vercel.app,https://pharosflow.net` |
+
+---
+
 ## Pharos Incubator — Proposed Milestones
 
 | Milestone | Timeline | Deliverable |
@@ -215,7 +277,7 @@ cd pharosflow-public/pharosflow-web && npm i && npm run dev
 
 **Stephen Benti** — Solo founder & full-stack blockchain engineer.
 
-PharosFlow is a solo project demonstrating that a single focused builder can design and ship production-grade blockchain infrastructure. Every line of code — from the Goldsky indexer pipeline to the EIP-712 signing SDK to the Bellman-Ford pathfinder — was written by Stephen.
+PharosFlow is a solo project demonstrating that a single focused builder can design and ship production-grade blockchain infrastructure. Every line of code — from the Goldsky indexer pipeline to the EIP-712 signing SDK to the Dijkstra pathfinder — was written by Stephen.
 
 > *"Pharos has deployed the RWA tokens. PharosFlow is the routing layer that makes them move."*
 

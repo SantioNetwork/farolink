@@ -1,0 +1,53 @@
+# PharosFlow — Goldsky Mirror Pipeline: SPN Cross-chain Messages
+#
+# Streams Pharos SPN (Secure Packet Network) cross-chain message events
+# into the goldsky_spn table so the StatusTracker can report delivery status.
+#
+# Deploy:
+#   goldsky pipeline apply --path goldsky/spn.pipeline.yaml
+#
+# The SPN is Pharos's native cross-chain messaging layer — similar to
+# LayerZero's packet system but native to the Pharos architecture.
+
+apiVersion: 3
+name: pharosflow-spn
+resource_size: s
+
+sources:
+  pharos_logs:
+    dataset_name: pharos_atlantic_testnet.raw_logs
+    version: 1.0.0
+    type: dataset
+    start_at: latest
+
+transforms:
+  # Filter to SPN MessageSent and MessageDelivered events
+  # These are emitted by the Pharos SPN router contract
+  spn_messages:
+    primary_key: id
+    sql: >
+      SELECT
+        id,
+        SPLIT_INDEX(topics, ',', 1)     AS message_id,
+        address                         AS sender,
+        0                               AS dest_chain_id,
+        CASE
+          WHEN SPLIT_INDEX(topics, ',', 0) = '0xb8e138887d0aa13bab447e82de9d5c1777d9cc7e9a87e9f6f9f891d359b2f37'
+          THEN 'DELIVERED'
+          ELSE 'PENDING'
+        END                             AS status,
+        0                               AS latency_ms,
+        block_timestamp                 AS created_at
+      FROM pharos_logs
+      WHERE SPLIT_INDEX(topics, ',', 0) IN (
+        '0x4e41ee13e03cd5e0446487b524fdc48af6acf26c074dacdbdfb6303e763ba8f5',
+        '0xb8e138887d0aa13bab447e82de9d5c1777d9cc7e9a87e9f6f9f891d359b2f37'
+      )
+
+sinks:
+  postgres_spn:
+    type: postgres
+    from: spn_messages
+    schema: public
+    table: goldsky_spn
+    secret_name: PHAROSFLOW_PG

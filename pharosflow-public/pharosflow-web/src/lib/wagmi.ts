@@ -5,7 +5,7 @@ import { type Chain } from 'viem';
 
 // Pharos Testnet chain definition
 const pharosTestnet = {
-    id: 688688,
+    id: 688689,
     name: 'Pharos Testnet',
     nativeCurrency: { name: 'Pharos', symbol: 'PHRS', decimals: 18 },
     rpcUrls: {

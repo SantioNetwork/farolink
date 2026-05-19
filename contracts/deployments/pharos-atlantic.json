@@ -1,0 +1,15 @@
+{
+  "network": "pharos-atlantic",
+  "chainId": 688689,
+  "deployer": "0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609",
+  "deployedAt": "2026-05-11T20:12:21.421Z",
+  "rpc": "https://atlantic.dplabs-internal.com",
+  "contracts": {
+    "PharosFlowRouter": {
+      "address": "0x31A647531f9EaA958DAE12Cc95BBb65Eab616A10",
+      "feeBps": 10,
+      "feeRecipient": "0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609",
+      "txHash": "0x1ad7b3af3bac2fb4d1611d4b0ad11f0ce26ac9aef5c945732cb20449dedf42e6"
+    }
+  }
+}

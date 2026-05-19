@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { CheckCircle2, Clock, Loader, XCircle, ExternalLink } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 type StatusValue = 'PENDING' | 'BROADCASTING' | 'CONFIRMED' | 'DELIVERED' | 'FAILED' | string;
 

@@ -8,7 +8,7 @@ function shortAddress(addr: string) {
 }
 
 const CHAIN_NAMES: Record<number, string> = {
-    688688: 'Pharos',
+    688689: 'Pharos',
     1:      'Ethereum',
     137:    'Polygon',
     42161:  'Arbitrum',

@@ -1,0 +1,9 @@
+export const CHAINS = {
+    PHAROS_ATLANTIC: 688689,
+    ETHEREUM: 1,
+    ARBITRUM: 42161,
+    OPTIMISM: 10,
+    BASE: 8453,
+    POLYGON: 137,
+    BSC: 56,
+};

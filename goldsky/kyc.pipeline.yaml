@@ -1,0 +1,50 @@
+# PharosFlow — Goldsky Mirror Pipeline: KYC / Compliance
+#
+# Streams Pharos KYC attestation events into the goldsky_kyc table.
+# Used by the ComplianceIndexer to gate high-value institutional flows.
+#
+# NOTE: This pipeline is OPTIONAL. It requires that the Pharos KYC registry
+# contract is deployed and emitting KYCAttestation events.
+# If you are not running a compliance-gated deployment, skip this pipeline.
+#
+# Deploy:
+#   goldsky pipeline apply --path goldsky/kyc.pipeline.yaml
+
+apiVersion: 3
+name: pharosflow-kyc
+resource_size: s
+
+sources:
+  pharos_kyc_logs:
+    dataset_name: pharos-testnet.raw_logs
+    version: 1.0.0
+    type: dataset
+    start_at: latest
+
+transforms:
+  # Filter to KYCAttestation events from the Pharos KYC registry
+  # KYCAttestation(address wallet, uint8 level, bool isKYCed, uint8 amlRisk, bytes32[] jurisdictions)
+  kyc_attestations:
+    primary_key: id
+    sql: >
+      SELECT
+        id,
+        topic1                                        AS address,
+        CAST(chain_id AS INT)                         AS chain_id,
+        CAST(data_0 AS BOOLEAN)                       AS is_kyced,
+        CAST(data_1 AS NUMERIC) / 100.0               AS aml_risk,
+        JSON_BUILD_ARRAY(data_2)                      AS jurisdictions,
+        block_timestamp                               AS created_at
+      FROM pharos_kyc_logs
+      WHERE topic0 =
+        -- KYCAttestation(address,uint8,bool,uint8,bytes32[])
+        '0x3aadc4062ebc9c5ebf14bc84e7f892bab34f30cb3ffbf1b16b2c5f3c0b7fc37'
+
+sinks:
+  postgres_kyc:
+    type: postgres
+    from: kyc_attestations
+    schema: public
+    table: goldsky_kyc
+    secret_name: PHAROSFLOW_PG
+    primary_key: id

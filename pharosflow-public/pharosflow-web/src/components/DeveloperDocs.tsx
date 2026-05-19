@@ -1,7 +1,7 @@
 import React from 'react';
 import { BookOpen, Terminal, CheckCircle2, Server, Key, Zap } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export default function DeveloperDocs() {
     return (
@@ -58,7 +58,7 @@ export default function DeveloperDocs() {
                     <li>
                         <Zap size={16} color="var(--accent)" style={{ flexShrink: 0 }} />
                         <span>
-                            <strong>L2 Router</strong> — Bellman-Ford pathfinding across liquidity graphs. Returns the optimal multi-hop route and gas estimates.
+                            <strong>L2 Router</strong> — Dijkstra pathfinding across liquidity graphs. Returns the optimal multi-hop route and gas estimates.
                         </span>
                     </li>
                     <li>

@@ -1,0 +1,73 @@
+{
+  "1": {
+    "name": "Ethereum Sepolia",
+    "rpcUrl": "https://rpc.sepolia.org",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59",
+      "circle_cctp": "0xb43db544E2c27092c107639Ad201b3dEfAbcF192",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66",
+      "pharos_native": "0x1111111111111111111111111111111111111111"
+    }
+  },
+  "42161": {
+    "name": "Arbitrum Sepolia",
+    "rpcUrl": "https://sepolia-rollup.arbitrum.io/rpc",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0x2a9C967262E2596b79743D8d438C3F5E3704a165",
+      "circle_cctp": "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66"
+    }
+  },
+  "10": {
+    "name": "Optimism Sepolia",
+    "rpcUrl": "https://sepolia.optimism.io",
+    "bridges": {
+      "layerzero": "0x6edce65403992e310a62460808c4b910d972f10f",
+      "chainlink_ccip": "0x114A2476538E221160a2A214a19D0a4F30700C57",
+      "circle_cctp": "0xb43db544E2c27092c107639Ad201b3dEfAbcF192",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66"
+    }
+  },
+  "8453": {
+    "name": "Base Sepolia",
+    "rpcUrl": "https://sepolia.base.org",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0xD3b06c670973C4a773177749F163533801248a93",
+      "circle_cctp": "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66"
+    }
+  },
+  "137": {
+    "name": "Polygon Amoy",
+    "rpcUrl": "https://rpc-amoy.polygon.technology",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0x9C32fCB8680647183e878703a7a976150b0684B2",
+      "circle_cctp": "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66"
+    }
+  },
+  "56": {
+    "name": "BNB Chain Testnet",
+    "rpcUrl": "https://data-seed-prebsc-1-s1.binance.org:8545",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66"
+    }
+  },
+  "688689": {
+    "name": "Pharos Atlantic Testnet",
+    "rpcUrl": "https://atlantic.dplabs-internal.com",
+    "bridges": {
+      "layerzero": "0x6EDCE65403992e310A62460808c4b910D972f10f",
+      "chainlink_ccip": "0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59",
+      "circle_cctp": "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA",
+      "debridge": "0xeF4fB24aD0916217251F553c0596F8Edc630EB66",
+      "pharos_native": "0x1111111111111111111111111111111111111111"
+    }
+  }
+}

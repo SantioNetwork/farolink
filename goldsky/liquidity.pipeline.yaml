@@ -1,0 +1,61 @@
+# PharosFlow — Goldsky Mirror Pipeline: DEX Liquidity
+#
+# Streams all Swap and Sync events from DEX pools on the Pharos testnet
+# directly into the goldsky_liquidity Postgres table.
+#
+# Deploy:
+#   goldsky secret create PHAROSFLOW_PG --value "postgres://user:pass@host:5432/pharos"
+#   goldsky pipeline apply --path goldsky/liquidity.pipeline.yaml
+#
+# Monitor:
+#   goldsky pipeline status pharosflow-liquidity
+#
+# ─── Goldsky dataset reference ────────────────────────────────────────────────
+# Dataset names are verified from: https://docs.goldsky.com/chains/pharos
+# Use `goldsky dataset list --chain pharos-testnet` to list all available datasets.
+
+apiVersion: 3
+name: pharosflow-liquidity
+resource_size: s
+
+sources:
+  # Raw Swap events from all DEX pools (Faroswap + Zenith on Pharos testnet)
+  pharos_swaps:
+    dataset_name: pharos_atlantic_testnet.raw_logs
+    version: 1.0.0
+    type: dataset
+    start_at: latest        # Set to a block number to backfill historical data
+
+transforms:
+  # Filter to Swap/Sync events only and extract liquidity fields
+  # Uniswap V2 Sync(uint112 reserve0, uint112 reserve1)
+  # Uniswap V2 Swap(address,uint256,uint256,uint256,uint256,address)
+  liquidity_events:
+    primary_key: id
+    sql: >
+      SELECT
+        id,
+        address                       AS pair_address,
+        246                           AS chain_id,
+        SPLIT_INDEX(topics, ',', 1)   AS token0,
+        SPLIT_INDEX(topics, ',', 2)   AS token1,
+        data                          AS raw_data,
+        0                             AS volume_24h,
+        block_timestamp               AS created_at
+      FROM pharos_swaps
+      WHERE SPLIT_INDEX(topics, ',', 0) IN (
+        -- Uniswap V2 Sync topic
+        '0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1',
+        -- Uniswap V3 Swap topic
+        '0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67'
+      )
+
+sinks:
+  postgres_liquidity:
+    type: postgres
+    from: liquidity_events
+    schema: public
+    table: goldsky_liquidity
+    secret_name: PHAROSFLOW_PG
+    # Goldsky upserts on primary_key — so re-org'd blocks update existing rows
+    # rather than leaving stale data

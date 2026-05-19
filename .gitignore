@@ -13,3 +13,21 @@ Thumbs.db
 scratch/
 coverage/
 .nyc_output/
+
+# Secrets & credentials
+secret.json
+*.secret.*
+.pg_secret.json
+.goldsky_env
+
+# Hardhat / Solidity
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+desktop.ini

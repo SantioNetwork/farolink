@@ -1,0 +1,135 @@
+version: "3.8"
+
+services:
+  # --- Infrastructure ---
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped   # Fix L-2
+    environment:
+      POSTGRES_USER: pharos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # Fix M-3: no longer hardcoded
+      POSTGRES_DB: pharosflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped   # Fix L-2
+    # Fix REDIS: password protection — prevents any process on the Docker network
+    # from flushing replay-protection keys without authentication.
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # --- Pharosflow Core (Private Cluster) ---
+  indexer:
+    build:
+      context: ./pharosflow-core/pharosflow-indexer
+    restart: unless-stopped   # Fix L-2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/pharosflow
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - GOLD_SKY_API_KEY=${GOLD_SKY_API_KEY}
+      - GOLD_SKY_STREAM_ENDPOINT=${GOLD_SKY_STREAM_ENDPOINT}
+      - PHAROS_KYC_API_KEY=${PHAROS_KYC_API_KEY}
+      - LOG_LEVEL=info
+
+  router:
+    build:
+      context: ./pharosflow-core/pharosflow-router
+    restart: unless-stopped   # Fix L-2
+    ports:
+      - "3001:3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - PORT=3001
+      - PRIVATE_RPC_URL=${PRIVATE_RPC_URL:-}
+      - LOG_LEVEL=info
+
+  api-gateway:
+    build:
+      context: ./pharosflow-core/pharosflow-api
+    restart: unless-stopped   # Fix L-2
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      router:
+        condition: service_started
+      executor:
+        condition: service_started
+    environment:
+      - ROUTER_API_URL=http://router:3001
+      - EXECUTOR_API_URL=http://executor:3002
+      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/pharosflow
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - ADMIN_KEY_HASH=${ADMIN_KEY_HASH}
+      - PORT=4000
+      - LOG_LEVEL=info
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,https://pharosflow.vercel.app,https://pharosflow.net,https://app.pharosflow.net}
+      - NODE_ENV=${NODE_ENV:-development}
+      # Fix C-1: Shared secret forwarded as x-internal-secret header to executor
+      - INTERNAL_SECRET=${INTERNAL_SECRET}
+
+  # --- Pharosflow Public ---
+  executor:
+    build:
+      context: ./pharosflow-public/pharosflow-executor
+    restart: unless-stopped   # Fix L-2
+    ports:
+      - "3002:3002"
+    environment:
+      # Fix C-1: Executor will reject any request without this secret
+      - INTERNAL_SECRET=${INTERNAL_SECRET}
+      # Private key loaded from host env — NEVER hardcoded here
+      - EXECUTOR_PRIVATE_KEY=${EXECUTOR_PRIVATE_KEY}
+      - RPC_URL=${RPC_URL:-https://testnet.dplabs-internal.com}
+      - PORT=3002
+      - FEE_COLLECTOR_ADDRESS=0x11314aEF91bF0fb7E52420c764ECFB68c2716be1
+      - PHAROS_BRIDGE_ADDRESS=${PHAROS_BRIDGE_ADDRESS:-}
+      - LAYERZERO_ENDPOINT_ADDRESS=${LAYERZERO_ENDPOINT_ADDRESS:-}
+      - CHAINLINK_CCIP_ROUTER=${CHAINLINK_CCIP_ROUTER:-}
+      - CIRCLE_CCTP_MESSENGER=${CIRCLE_CCTP_MESSENGER:-}
+      - AXELAR_GATEWAY_ADDRESS=${AXELAR_GATEWAY_ADDRESS:-}
+      - WORMHOLE_BRIDGE_ADDRESS=${WORMHOLE_BRIDGE_ADDRESS:-}
+      - DEBRIDGE_DLN_ADDRESS=${DEBRIDGE_DLN_ADDRESS:-}
+      - LOG_LEVEL=info
+
+  frontend:
+    build:
+      context: ./pharosflow-public/pharosflow-web
+    restart: unless-stopped   # Fix L-2
+    ports:
+      - "8080:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  postgres-data:
+  redis-data:

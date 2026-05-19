@@ -65,11 +65,11 @@ You must run all microservices concurrently for the system to process intents se
    npm start
    ```
 
-*(For local testing, the Gateway API is exposed at `http://localhost:3000`)*
+*(For local testing, the Gateway API is exposed at `http://localhost:4000`)*
 
 ## 📚 API Documentation
 Once the API gateway is running, interactive Swagger/OpenAPI documentation is available at:
-👉 **[http://localhost:3000/api-docs](http://localhost:3000/api-docs)** 
+👉 **[http://localhost:4000/api-docs](http://localhost:4000/api-docs)** 
 
 ---
 
