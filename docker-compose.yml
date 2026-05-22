@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_USER: pharos
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # Fix M-3: no longer hardcoded
-      POSTGRES_DB: pharosflow
+      POSTGRES_DB: farolink
     ports:
       - "5432:5432"
     volumes:
@@ -36,10 +36,10 @@ services:
       timeout: 3s
       retries: 5
 
-  # --- Pharosflow Core (Private Cluster) ---
+  # --- FaroLink Core (Private Cluster) ---
   indexer:
     build:
-      context: ./pharosflow-core/pharosflow-indexer
+      context: ./farolink-core/farolink-indexer
     restart: unless-stopped   # Fix L-2
     depends_on:
       postgres:
@@ -47,7 +47,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/pharosflow
+      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/farolink
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
       - GOLD_SKY_API_KEY=${GOLD_SKY_API_KEY}
       - GOLD_SKY_STREAM_ENDPOINT=${GOLD_SKY_STREAM_ENDPOINT}
@@ -56,7 +56,7 @@ services:
 
   router:
     build:
-      context: ./pharosflow-core/pharosflow-router
+      context: ./farolink-core/farolink-router
     restart: unless-stopped   # Fix L-2
     ports:
       - "3001:3001"
@@ -71,7 +71,7 @@ services:
 
   api-gateway:
     build:
-      context: ./pharosflow-core/pharosflow-api
+      context: ./farolink-core/farolink-api
     restart: unless-stopped   # Fix L-2
     ports:
       - "4000:4000"
@@ -87,20 +87,20 @@ services:
     environment:
       - ROUTER_API_URL=http://router:3001
       - EXECUTOR_API_URL=http://executor:3002
-      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/pharosflow
+      - DATABASE_URL=postgres://pharos:${POSTGRES_PASSWORD}@postgres:5432/farolink
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
       - ADMIN_KEY_HASH=${ADMIN_KEY_HASH}
       - PORT=4000
       - LOG_LEVEL=info
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,https://pharosflow.vercel.app,https://pharosflow.net,https://app.pharosflow.net}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,https://farolink.vercel.app,https://farolink.net,https://app.farolink.net}
       - NODE_ENV=${NODE_ENV:-development}
       # Fix C-1: Shared secret forwarded as x-internal-secret header to executor
       - INTERNAL_SECRET=${INTERNAL_SECRET}
 
-  # --- Pharosflow Public ---
+  # --- FaroLink Public ---
   executor:
     build:
-      context: ./pharosflow-public/pharosflow-executor
+      context: ./farolink-public/farolink-executor
     restart: unless-stopped   # Fix L-2
     ports:
       - "3002:3002"
@@ -123,7 +123,7 @@ services:
 
   frontend:
     build:
-      context: ./pharosflow-public/pharosflow-web
+      context: ./farolink-public/farolink-web
     restart: unless-stopped   # Fix L-2
     ports:
       - "8080:80"

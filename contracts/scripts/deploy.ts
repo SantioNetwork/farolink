@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 // Load the compiled artifact
-const artifactPath = path.join(__dirname, "..", "artifacts", "contracts", "PharosFlowRouter.sol", "PharosFlowRouter.json");
+const artifactPath = path.join(__dirname, "..", "artifacts", "contracts", "FaroLinkRouter.sol", "FaroLinkRouter.json");
 if (!fs.existsSync(artifactPath)) {
     console.error("❌ Artifact not found. Run: npx hardhat compile");
     process.exit(1);
@@ -25,7 +25,7 @@ async function main() {
         process.exit(1);
     }
 
-    console.log("\n🚀 PharosFlow — Direct ethers.js Deployment");
+    console.log("\n🚀 FaroLink — Direct ethers.js Deployment");
     console.log("━".repeat(55));
     console.log(`RPC:     ${RPC_URL}`);
 
@@ -55,7 +55,7 @@ async function main() {
     const FEE_BPS       = 10;              // 0.10%
     const FEE_RECIPIENT = wallet.address;  // Fees go to deployer wallet initially
 
-    console.log(`\nDeploying PharosFlowRouter (fee: ${FEE_BPS} bps → ${FEE_RECIPIENT})...`);
+    console.log(`\nDeploying FaroLinkRouter (fee: ${FEE_BPS} bps → ${FEE_RECIPIENT})...`);
 
     const factory  = new ethers.ContractFactory(artifact.abi, artifact.bytecode, wallet);
 
@@ -80,7 +80,7 @@ async function main() {
     await deployTx.waitForDeployment();
     const routerAddress = await deployTx.getAddress();
 
-    console.log(`\n✅ PharosFlowRouter deployed!`);
+    console.log(`\n✅ FaroLinkRouter deployed!`);
     console.log(`   Address: ${routerAddress}`);
     console.log(`   Explorer: https://testnet.pharosscan.xyz/address/${routerAddress}`);
 
@@ -95,7 +95,7 @@ async function main() {
         deployedAt: new Date().toISOString(),
         rpc:        RPC_URL,
         contracts: {
-            PharosFlowRouter: {
+            FaroLinkRouter: {
                 address:      routerAddress,
                 feeBps:       FEE_BPS,
                 feeRecipient: FEE_RECIPIENT,

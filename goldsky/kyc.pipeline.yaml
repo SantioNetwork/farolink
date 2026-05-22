@@ -1,4 +1,4 @@
-# PharosFlow — Goldsky Mirror Pipeline: KYC / Compliance
+# FaroLink — Goldsky Mirror Pipeline: KYC / Compliance
 #
 # Streams Pharos KYC attestation events into the goldsky_kyc table.
 # Used by the ComplianceIndexer to gate high-value institutional flows.
@@ -11,7 +11,7 @@
 #   goldsky pipeline apply --path goldsky/kyc.pipeline.yaml
 
 apiVersion: 3
-name: pharosflow-kyc
+name: farolink-kyc
 resource_size: s
 
 sources:
@@ -46,5 +46,5 @@ sinks:
     from: kyc_attestations
     schema: public
     table: goldsky_kyc
-    secret_name: PHAROSFLOW_PG
+    secret_name: FAROLINK_PG
     primary_key: id

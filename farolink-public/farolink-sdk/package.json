@@ -1,0 +1,43 @@
+{
+  "name": "@farolink/sdk",
+  "version": "1.0.0",
+  "description": "The official TypeScript SDK for routing intents on the Pharos Network",
+  "author": "FaroLink Labs",
+  "license": "MIT",
+  "homepage": "https://farolink.net",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farolink/farolink-public"
+  },
+  "keywords": ["pharos", "cross-chain", "bridge", "intent", "defi", "liquidity"],
+
+  "main":  "dist/index.js",
+  "types": "dist/index.d.ts",
+
+  "exports": {
+    ".": {
+      "import":  "./dist/index.js",
+      "require": "./dist/index.js",
+      "types":   "./dist/index.d.ts"
+    }
+  },
+
+  "files": ["dist"],
+
+  "scripts": {
+    "build":           "tsc",
+    "prepublishOnly":  "npm run build",
+    "typecheck":       "tsc --noEmit"
+  },
+
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+
+  "engines": {
+    "node": ">=18"
+  }
+}

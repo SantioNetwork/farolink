@@ -1,5 +1,5 @@
 -- =============================================================================
--- PharosFlow Unified Database Schema
+-- FaroLink Unified Database Schema
 -- Fix #17 / #30: Single authoritative schema replacing the two parallel systems.
 --
 -- TABLES:

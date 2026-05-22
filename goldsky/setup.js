@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PharosFlow — Goldsky Pipeline Activation Guide + Preflight Check
+ * FaroLink — Goldsky Pipeline Activation Guide + Preflight Check
  *
  * Run this script to verify prerequisites before activating live Goldsky data.
  * Usage: node goldsky/setup.js [--activate]
@@ -12,14 +12,14 @@
 const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', 'pharosflow-core', 'pharosflow-indexer', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', 'farolink-core', 'farolink-indexer', '.env') });
 
 const ACTIVATE = process.argv.includes('--activate');
 const DATABASE_URL = process.env.DATABASE_URL;
 const GOLD_SKY_API_KEY = process.env.GOLD_SKY_API_KEY;
 
 console.log('='.repeat(60));
-console.log('PharosFlow — Goldsky Integration Setup');
+console.log('FaroLink — Goldsky Integration Setup');
 console.log('='.repeat(60));
 
 // ── Step 1: Preflight checks ──────────────────────────────────────────────────
@@ -29,7 +29,7 @@ console.log('\n[1] Preflight Checks');
 if (DATABASE_URL && DATABASE_URL.startsWith('postgresql://')) {
   console.log('  ✅ DATABASE_URL configured (Neon PostgreSQL)');
 } else {
-  console.log('  ❌ DATABASE_URL missing in pharosflow-indexer/.env');
+  console.log('  ❌ DATABASE_URL missing in farolink-indexer/.env');
   process.exit(1);
 }
 
@@ -39,7 +39,7 @@ if (GOLD_SKY_API_KEY && GOLD_SKY_API_KEY.length > 10) {
 } else {
   console.log('  ⚠️  GOLD_SKY_API_KEY is empty');
   console.log('     → Get your key at: https://app.goldsky.com/dashboard/api-keys');
-  console.log('     → Add to pharosflow-core/pharosflow-indexer/.env:');
+  console.log('     → Add to farolink-core/farolink-indexer/.env:');
   console.log('       GOLD_SKY_API_KEY=your_key_here');
   if (!ACTIVATE) {
     console.log('\n  ℹ️  GOLDSKY ARCHITECTURE NOTE:');
@@ -90,7 +90,7 @@ const steps = [
   },
   {
     title: 'Register Neon DB as Goldsky secret',
-    cmd: `goldsky secret create PHAROSFLOW_PG --value "${DATABASE_URL ? DATABASE_URL.slice(0, 40) + '...' : 'YOUR_NEON_URL'}"`,
+    cmd: `goldsky secret create FAROLINK_PG --value "${DATABASE_URL ? DATABASE_URL.slice(0, 40) + '...' : 'YOUR_NEON_URL'}"`,
     notes: 'Goldsky Mirror will push data INTO this database',
   },
   {
@@ -107,7 +107,7 @@ const steps = [
   },
   {
     title: 'Monitor pipeline health',
-    cmd: 'goldsky pipeline status pharosflow-liquidity',
+    cmd: 'goldsky pipeline status farolink-liquidity',
     notes: 'Once running, the indexer GoldskyConsumer auto-picks up data via watermark polling',
   },
 ];
@@ -133,8 +133,8 @@ if (ACTIVATE) {
 
   try {
     // Register the PG secret
-    console.log('\nRegistering PHAROSFLOW_PG secret...');
-    execSync(`goldsky secret create PHAROSFLOW_PG --value "${DATABASE_URL}"`, { stdio: 'inherit' });
+    console.log('\nRegistering FAROLINK_PG secret...');
+    execSync(`goldsky secret create FAROLINK_PG --value "${DATABASE_URL}"`, { stdio: 'inherit' });
 
     // Deploy pipelines
     for (const f of pipelineFiles) {

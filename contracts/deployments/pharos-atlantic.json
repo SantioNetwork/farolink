@@ -5,7 +5,7 @@
   "deployedAt": "2026-05-11T20:12:21.421Z",
   "rpc": "https://atlantic.dplabs-internal.com",
   "contracts": {
-    "PharosFlowRouter": {
+    "FaroLinkRouter": {
       "address": "0x31A647531f9EaA958DAE12Cc95BBb65Eab616A10",
       "feeBps": 10,
       "feeRecipient": "0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609",

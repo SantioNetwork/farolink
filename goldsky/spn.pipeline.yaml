@@ -1,4 +1,4 @@
-# PharosFlow — Goldsky Mirror Pipeline: SPN Cross-chain Messages
+# FaroLink — Goldsky Mirror Pipeline: SPN Cross-chain Messages
 #
 # Streams Pharos SPN (Secure Packet Network) cross-chain message events
 # into the goldsky_spn table so the StatusTracker can report delivery status.
@@ -10,7 +10,7 @@
 # LayerZero's packet system but native to the Pharos architecture.
 
 apiVersion: 3
-name: pharosflow-spn
+name: farolink-spn
 resource_size: s
 
 sources:
@@ -50,4 +50,4 @@ sinks:
     from: spn_messages
     schema: public
     table: goldsky_spn
-    secret_name: PHAROSFLOW_PG
+    secret_name: FAROLINK_PG

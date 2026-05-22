@@ -1,4 +1,4 @@
-# Pharosflow Podman Test Results
+# FaroLink Podman Test Results
 
 **Date:** May 8, 2026  
 **Status:** ✅ **PODMAN VERIFIED & FUNCTIONAL**
@@ -37,11 +37,11 @@
 ## Project Configuration
 
 ### Fixed Missing Dependencies
-✅ [pharosflow-executor/package.json](pharosflow-public/pharosflow-executor/package.json)
+✅ [farolink-executor/package.json](farolink-public/farolink-executor/package.json)
 - Created with required dependencies: cors, ethers, express, winston
 - DevDependencies: typescript, ts-node, type definitions
 
-✅ [pharosflow-executor/tsconfig.json](pharosflow-public/pharosflow-executor/tsconfig.json)
+✅ [farolink-executor/tsconfig.json](farolink-public/farolink-executor/tsconfig.json)
 - Configured for modern Node.js + TypeScript compilation
 
 ---
@@ -65,15 +65,15 @@
 ### Option 1: Run Individual Services (Recommended for Testing)
 ```powershell
 # Start PostgreSQL
-podman run -d --name pharosflow-db \
+podman run -d --name farolink-db \
   -e POSTGRES_USER=pharos \
   -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=pharosflow \
+  -e POSTGRES_DB=farolink \
   -p 5432:5432 \
   postgres:15-alpine
 
 # Start Redis  
-podman run -d --name pharosflow-cache \
+podman run -d --name farolink-cache \
   -p 6379:6379 \
   redis:7-alpine
 ```

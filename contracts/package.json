@@ -1,7 +1,7 @@
 {
-  "name": "pharosflow-contracts",
+  "name": "farolink-contracts",
   "version": "1.0.0",
-  "description": "PharosFlow on-chain router and fee contracts",
+  "description": "FaroLink on-chain router and fee contracts",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

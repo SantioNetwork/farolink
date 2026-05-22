@@ -1,21 +1,21 @@
-# PharosFlow — Goldsky Mirror Pipeline: DEX Liquidity
+# FaroLink — Goldsky Mirror Pipeline: DEX Liquidity
 #
 # Streams all Swap and Sync events from DEX pools on the Pharos testnet
 # directly into the goldsky_liquidity Postgres table.
 #
 # Deploy:
-#   goldsky secret create PHAROSFLOW_PG --value "postgres://user:pass@host:5432/pharos"
+#   goldsky secret create FAROLINK_PG --value "postgres://user:pass@host:5432/pharos"
 #   goldsky pipeline apply --path goldsky/liquidity.pipeline.yaml
 #
 # Monitor:
-#   goldsky pipeline status pharosflow-liquidity
+#   goldsky pipeline status farolink-liquidity
 #
 # ─── Goldsky dataset reference ────────────────────────────────────────────────
 # Dataset names are verified from: https://docs.goldsky.com/chains/pharos
 # Use `goldsky dataset list --chain pharos-testnet` to list all available datasets.
 
 apiVersion: 3
-name: pharosflow-liquidity
+name: farolink-liquidity
 resource_size: s
 
 sources:
@@ -56,6 +56,6 @@ sinks:
     from: liquidity_events
     schema: public
     table: goldsky_liquidity
-    secret_name: PHAROSFLOW_PG
+    secret_name: FAROLINK_PG
     # Goldsky upserts on primary_key — so re-org'd blocks update existing rows
     # rather than leaving stale data
