@@ -2,14 +2,14 @@
   "network": "pharos-atlantic",
   "chainId": 688689,
   "deployer": "0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609",
-  "deployedAt": "2026-05-11T20:12:21.421Z",
+  "deployedAt": "2026-05-23T12:18:00.221Z",
   "rpc": "https://atlantic.dplabs-internal.com",
   "contracts": {
     "FaroLinkRouter": {
-      "address": "0x31A647531f9EaA958DAE12Cc95BBb65Eab616A10",
+      "address": "0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6",
       "feeBps": 10,
       "feeRecipient": "0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609",
-      "txHash": "0x1ad7b3af3bac2fb4d1611d4b0ad11f0ce26ac9aef5c945732cb20449dedf42e6"
+      "txHash": "0x79978d436b5e767fcdb2a8624a1080d0102412058be9e8baa19092fd0dc885a9"
     }
   }
 }

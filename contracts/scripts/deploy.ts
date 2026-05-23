@@ -71,7 +71,7 @@ async function main() {
 
     const deployTx = await factory.deploy(FEE_BPS, FEE_RECIPIENT, {
         gasPrice,
-        gasLimit: 3_000_000n,
+        gasLimit: 1_180_000n,
     });
 
     console.log(`Tx sent:  ${deployTx.deploymentTransaction()?.hash}`);
