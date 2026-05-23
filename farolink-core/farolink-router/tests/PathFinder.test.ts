@@ -14,18 +14,18 @@ describe('FaroLink PathFinder Algorithm', () => {
 
         // Fix #10: The real method is getOutgoingEdges, not getAdjacentNodes
         mockGraph.getOutgoingEdges.mockImplementation((nodeId: string) => {
-            if (nodeId === '1:0xMockETH') {
+            if (nodeId === '1:0xmocketh') {
                 return [
                     {
-                        sourceId: '1:0xMockETH',
-                        targetId: '1337:0xMockETH',
+                        sourceId: '1:0xmocketh',
+                        targetId: '1337:0xmocketh',
                         venue:    'debridge',
                         weight:   1.002,  // deBridge: low fee, risk score 0
                         baseFee:  20,
                     },
                     {
-                        sourceId: '1:0xMockETH',
-                        targetId: '1337:0xMockETH',
+                        sourceId: '1:0xmocketh',
+                        targetId: '1337:0xmocketh',
                         venue:    'layerzero',
                         weight:   1.005,  // LayerZero: higher fee
                         baseFee:  50,
@@ -42,8 +42,8 @@ describe('FaroLink PathFinder Algorithm', () => {
         const req: RouteRequest = {
             fromChain: 1,
             toChain:   1337,
-            fromToken: '0xMockETH',
-            toToken:   '0xMockETH',
+            fromToken: '0xmocketh',
+            toToken:   '0xmocketh',
             amountIn:  1000000000n,
             slippageToleranceBps: 50,
             userAddress: '0xUserWallet',
@@ -61,8 +61,8 @@ describe('FaroLink PathFinder Algorithm', () => {
         const req: RouteRequest = {
             fromChain: 1,
             toChain:   1337,
-            fromToken: '0xMockETH',
-            toToken:   '0xMockETH',
+            fromToken: '0xmocketh',
+            toToken:   '0xmocketh',
             amountIn:  1000000000n,
             slippageToleranceBps: 50,
         };
@@ -81,8 +81,8 @@ describe('FaroLink PathFinder Algorithm', () => {
         const req: RouteRequest = {
             fromChain: 1,
             toChain:   1337,
-            fromToken: '0xMockETH',
-            toToken:   '0xMockETH',
+            fromToken: '0xmocketh',
+            toToken:   '0xmocketh',
             amountIn:  1000n,
             slippageToleranceBps: 50,
         };
@@ -96,8 +96,8 @@ describe('FaroLink PathFinder Algorithm', () => {
         const req: RouteRequest = {
             fromChain: 1,
             toChain:   1337,
-            fromToken: '0xMockETH',
-            toToken:   '0xMockETH',
+            fromToken: '0xmocketh',
+            toToken:   '0xmocketh',
             amountIn,
             slippageToleranceBps: 50,
         };

@@ -69,14 +69,14 @@ export class PathFinder {
 
     public async findBestRoute(request: RouteRequest): Promise<RouteResponse | null> {
         // Fix #5: RouteRequest now has flat fromChain/toChain + address strings
-        const srcId = `${request.fromChain}:${request.fromToken}`;
-        const tgtId = `${request.toChain}:${request.toToken}`;
+        const srcId = `${request.fromChain}:${request.fromToken.toLowerCase()}`;
+        const tgtId = `${request.toChain}:${request.toToken.toLowerCase()}`;
 
         // Fix L-7: Maximum hops must match the on-chain contract limit (executePath allows ≤5)
         const MAX_HOPS = 5;
 
         // RWA Compliance check
-        const compliance = this.complianceGate.analyzeForRWA(request.fromToken);
+        const compliance = this.complianceGate.analyzeForRWA(request.fromToken.toLowerCase());
 
         // Fix #6: Proper Dijkstra with min-heap + best-distance tracking
         const queue = new MinHeap<PathNode>();
