@@ -10,13 +10,15 @@ export type Hop = {
     toChain: number;
     fromToken: Token;
     toToken: Token;
-    venue: "pharos_spn" | "layerzero" | "chainlink_ccip" | "circle_cctp" | "axelar" | "wormhole" | "debridge";
+    venue: "pharos-native" | "pharos_spn" | "layerzero" | "chainlink_ccip" | "circle_cctp" | "axelar" | "wormhole" | "debridge";
     poolAddress?: string;
-    estimatedOutput: bigint;
+    amountIn?: bigint;           // Raw input amount (used when estimatedOutput is not yet known)
+    estimatedOutput: bigint;     // Expected output after fees/slippage
     estimatedGas: bigint;
     slippageBps: number;
     latencyMs: number;
     bridgeFee?: bigint;
+    recipient?: string;          // Override destination address (defaults to sender)
 };
 
 export type BridgeInfo = {

@@ -17,7 +17,7 @@ async function main() {
       key: 'liquidity:688689:0xMockUsdmUsdcPharos',
       data: {
         token0: '0x59D9356E565Ab3A36dD77763Fc0d87fEaf85508C', // USDM
-        token1: '0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B', // USDC (Pharos)
+        token1: '0xe0be08c77f415f577a1b3a9ad7a1df1479564ec8', // USDC (Pharos)
         reserves: ["1000000000000000000000000", "1000000000000"] // 1M USDM (18 dec) : 1M USDC (6 dec)
       }
     },
@@ -25,7 +25,7 @@ async function main() {
       key: 'liquidity:688689:0xMockUsdyUsdcPharos',
       data: {
         token0: '0x96f6ef951840721adbf46ac996b59e0235cb985c', // USDY
-        token1: '0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B', // USDC (Pharos)
+        token1: '0xe0be08c77f415f577a1b3a9ad7a1df1479564ec8', // USDC (Pharos)
         reserves: ["1000000000000000000000000", "1000000000000"] // 1M USDY (18 dec) : 1M USDC (6 dec)
       }
     },

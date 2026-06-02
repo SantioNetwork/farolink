@@ -4,7 +4,7 @@
   "description": "The official TypeScript SDK for routing intents on the Pharos Network",
   "author": "FaroLink Labs",
   "license": "MIT",
-  "homepage": "https://farolink.net",
+  "homepage": "https://farolink.xyz",
   "repository": {
     "type": "git",
     "url": "https://github.com/farolink/farolink-public"

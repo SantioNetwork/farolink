@@ -37,10 +37,23 @@ const pathFinder = new PathFinder(graph);
 const routeScorer = new RouteScorer();
 const mevShield = new MEVShield(env.PRIVATE_RPC_URL ?? '');
 
-// Realtime Graph sync loop
-setInterval(() => {
-    graph.refreshGraph().catch(e => logger.error('Graph refresh failed', e));
-}, 10000);
+// Realtime Graph sync loop — 120s interval to conserve Redis request quota
+// (Upstash free tier: 500K/month; at 10s intervals that burns ~260K/month on refreshes alone)
+let refreshing = false;
+setInterval(async () => {
+    if (refreshing) return; // skip if previous refresh is still running
+    refreshing = true;
+    try {
+        await Promise.race([
+            graph.refreshGraph(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Refresh timeout')), 15000))
+        ]);
+    } catch (e: any) {
+        logger.warn('Graph refresh failed/timed out', { error: e.message });
+    } finally {
+        refreshing = false;
+    }
+}, 120000);
 
 app.post('/route', async (req, res) => {
     try {
@@ -95,6 +108,17 @@ app.get('/health', (req, res) => {
 
 async function main() {
     await graph.refreshGraph();
+    
+    // Check if we have any DEX edges. If not, operators need to seed or check the indexer.
+    const snapshot = graph.getGraphSnapshot();
+    if (snapshot.nodes === 0) {
+        logger.warn('⚠️  NO DEX EDGES LOADED — the router has no liquidity data!');
+        logger.warn('    Run: npx ts-node src/seed_all_tokens.ts  to seed mock liquidity');
+        logger.warn('    Or check that the indexer is running and writing to Redis.');
+    } else {
+        logger.info(`Graph initialized with ${snapshot.nodes} source nodes`);
+    }
+
     const server = app.listen(env.PORT, () => {
         logger.info(`FaroLink Router listening on port ${env.PORT}`);
     });

@@ -40,13 +40,21 @@ export default function App() {
                 {/* Wallet & Grant Link — Fix B1 */}
                 <div className="navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <a
-                        href="/whitepaper.docx"
+                        href="/whitepaper.html"
                         target="_blank"
-                        download
                         style={{ color: 'var(--accent)', fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
                         <FileText size={14} />
                         Whitepaper
+                    </a>
+                    <a
+                        href="https://github.com/santionetwork/farolink"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--accent)', fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                        <Code2 size={14} />
+                        GitHub
                     </a>
                     <WalletButton />
                 </div>

@@ -4,7 +4,7 @@
   "description": "FaroLink transaction executor for bridge transactions",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "ts-node --transpile-only src/index.ts",
     "build": "tsc",
     "compile": "hardhat compile",
     "test": "hardhat test",

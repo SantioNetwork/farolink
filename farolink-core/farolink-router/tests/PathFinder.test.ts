@@ -110,4 +110,52 @@ describe('FaroLink PathFinder Algorithm', () => {
         expect(hopOutput).toBeLessThan(amountIn);
         expect(hopOutput).toBeGreaterThan(0n);
     });
+
+    it('should select parallel pool that maximizes output rate over pool with bad exchange rate', async () => {
+        mockGraph.getOutgoingEdges.mockImplementation((nodeId: string) => {
+            if (nodeId === '688689:0xmockweth') {
+                return [
+                    {
+                        sourceId:    '688689:0xmockweth',
+                        targetId:    '688689:0xmockusdc',
+                        venue:       'dex_pool',
+                        weight:      1.003,
+                        baseFee:     30,
+                        reserves:    6805000000000000000000n,    // Bad pool: 6805 WETH
+                        reserves1:   111362000000n,              // Bad pool: 111362 USDC (~$16 per WETH)
+                        poolAddress: '0xbadpool',
+                    },
+                    {
+                        sourceId:    '688689:0xmockweth',
+                        targetId:    '688689:0xmockusdc',
+                        venue:       'dex_pool',
+                        weight:      1.003,
+                        baseFee:     30,
+                        reserves:    3125000000000000000000n,    // Good pool: 3125 WETH
+                        reserves1:   10000000000000n,            // Good pool: 10M USDC (~$3200 per WETH)
+                        poolAddress: '0xgoodpool',
+                    }
+                ];
+            }
+            return [];
+        });
+
+        const req: RouteRequest = {
+            fromChain: 688689,
+            toChain:   688689,
+            fromToken: '0xmockweth',
+            toToken:   '0xmockusdc',
+            amountIn:  1000000000000000000n, // 1 WETH
+            slippageToleranceBps: 50,
+        };
+
+        const result = await pathFinder.findBestRoute(req);
+
+        expect(result).not.toBeNull();
+        expect(result!.hops.length).toBe(1);
+        // It must select the pool with the much better output rate (0xgoodpool)
+        expect(result!.hops[0].poolAddress).toBe('0xgoodpool');
+        expect(BigInt(result!.expectedOutput)).toBeGreaterThan(3000000000n); // Output should be ~3189 USDC
+    });
 });
+

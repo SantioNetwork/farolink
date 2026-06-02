@@ -12,7 +12,7 @@ const envSchema = z.object({
   LOG_LEVEL:        z.enum(["error", "warn", "info", "http", "verbose", "debug", "silly"]).default("info"),
   PORT:             z.string().default("4000"),
   // Fix C2: Comma-separated list of allowed CORS origins
-  ALLOWED_ORIGINS:  z.string().default("http://localhost:5173,http://localhost:4000,https://farolink.vercel.app,https://farolink.net"),
+  ALLOWED_ORIGINS:  z.string().default("http://localhost:5173,http://localhost:4000,https://farolink.vercel.app,https://farolink.xyz,https://app.farolink.xyz"),
   // Fix L5: Environment mode for HTTPS redirect and swagger gating
   NODE_ENV:         z.enum(["development", "production", "test"]).default("development"),
   // Fix C-1: Shared secret forwarded to the executor service in x-internal-secret header

@@ -22,7 +22,7 @@ export type { ReentrancyGuard } from "./@openzeppelin/contracts/utils/Reentrancy
 export { ReentrancyGuard__factory } from "./factories/@openzeppelin/contracts/utils/ReentrancyGuard__factory";
 export type { Strings } from "./@openzeppelin/contracts/utils/Strings";
 export { Strings__factory } from "./factories/@openzeppelin/contracts/utils/Strings__factory";
-export type { FeeCollector } from "./contracts/FeeCollector";
-export { FeeCollector__factory } from "./factories/contracts/FeeCollector__factory";
 export type { FaroLinkRouter } from "./contracts/FaroLinkRouter";
 export { FaroLinkRouter__factory } from "./factories/contracts/FaroLinkRouter__factory";
+export type { FeeCollector } from "./contracts/FeeCollector";
+export { FeeCollector__factory } from "./factories/contracts/FeeCollector__factory";

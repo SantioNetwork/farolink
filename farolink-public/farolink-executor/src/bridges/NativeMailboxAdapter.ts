@@ -10,8 +10,11 @@ const MAILBOX_ABI = [
 const PHAROS_DOMAIN: Record<number, number> = {
     1:      1,      // Ethereum
     1337:   1337,   // Pharos Testnet
+    688689: 688689, // Pharos Atlantic Testnet
     137:    137,    // Polygon
     42161:  42161,  // Arbitrum
+    8453:   8453,   // Base
+    10:     10,     // Optimism
 };
 
 export class NativeMailboxAdapter implements BridgeAdapter {
@@ -22,6 +25,10 @@ export class NativeMailboxAdapter implements BridgeAdapter {
     }
 
     async prepareTx(hop: Hop, sender: string): Promise<BridgeTx> {
+        if (hop.fromChain === hop.toChain) {
+            throw new Error("pharos-native does not support same-chain transfers");
+        }
+
         const mailbox = process.env.PHAROS_BRIDGE_ADDRESS;
         if (!mailbox || mailbox === "") {
             throw new Error("PHAROS_BRIDGE_ADDRESS not configured");

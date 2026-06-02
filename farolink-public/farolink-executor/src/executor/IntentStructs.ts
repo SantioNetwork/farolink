@@ -36,6 +36,6 @@ export type BridgingIntent = {
     targetChainId:          number;  // Fix #22: added — needed for routing context
     deadline:               number;  // unix timestamp
     signature?:             string;  // EIP-712 signature, required for execution
-    // ERC-4337 UserOperation bundle
-    userOp:                 UserOperation;
+    // ERC-4337 UserOperation bundle (optional — not required for direct bridge execution)
+    userOp?:                UserOperation;
 };

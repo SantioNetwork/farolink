@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Settings, ArrowDown, ChevronDown, Rocket, ShieldCheck, RefreshCw, AlertCircle, CheckCircle2, ExternalLink, AlertTriangle } from 'lucide-react';
-import { useAccount, useSignTypedData, useChainId } from 'wagmi';
+import { useAccount, useSignTypedData, useChainId, useSwitchChain } from 'wagmi';
 import axios from 'axios';
 import TokenModal from './TokenModal';
 import RouteVisualizer from './RouteVisualizer';
@@ -10,8 +10,14 @@ import type { TokenInfo } from '../lib/tokenList';
 import { TOKENS, formatUSD, fetchLivePrices } from '../lib/tokenList';
 
 const CHAIN_NAMES: Record<number, string> = {
-  688689: 'Pharos', 1: 'Ethereum', 42161: 'Arbitrum',
-  10: 'Optimism', 8453: 'Base', 137: 'Polygon', 56: 'BSC',
+  688689: 'Pharos Atlantic Testnet',
+  1672: 'Pharos Pacific Mainnet',
+  1: 'Ethereum',
+  42161: 'Arbitrum',
+  10: 'Optimism',
+  8453: 'Base',
+  137: 'Polygon',
+  56: 'BSC',
 };
 
 // Note: crypto.randomUUID() is available in all modern browsers (Chrome 92+, FF 95+, Safari 15.4+)
@@ -19,6 +25,27 @@ const CHAIN_NAMES: Record<number, string> = {
 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+/**
+ * Formats a raw BigInt string (e.g. from router output) into a human-readable decimal.
+ * Uses pure BigInt arithmetic to avoid precision loss from Number() conversion
+ * (which truncates values > 2^53, common with 18-decimal tokens).
+ */
+function formatBigIntOutput(raw: string, decimals: number): string {
+    try {
+        const bi = BigInt(raw);
+        if (bi === 0n) return '0.000000';
+        const divisor = 10n ** BigInt(decimals);
+        const wholePart = bi / divisor;
+        const fracPart = (bi < 0n ? -bi : bi) % divisor;
+        const fracStr = fracPart.toString().padStart(decimals, '0').slice(0, 6);
+        // Trim trailing zeros for cleaner display, but keep at least 2 decimal places
+        const trimmed = fracStr.replace(/0+$/, '').padEnd(2, '0');
+        return `${wholePart}.${trimmed}`;
+    } catch {
+        return '0.00';
+    }
+}
 
 const DEFAULT_FROM = TOKENS.find(t => t.symbol === 'WETH' && t.chainId === 688689) ?? TOKENS[0]!;
 const DEFAULT_TO   = TOKENS.find(t => t.symbol === 'USDC' && t.chainId === 688689) ?? TOKENS[1]!;
@@ -54,6 +81,7 @@ export default function SwapWidget() {
     const { address, isConnected }  = useAccount();
     const chainId                   = useChainId();
     const { signTypedDataAsync }    = useSignTypedData();
+    const { switchChain }           = useSwitchChain();
 
     const [amount,       setAmount]       = useState('');
     const [fromToken,    setFromToken]    = useState<TokenInfo>(DEFAULT_FROM);
@@ -118,20 +146,22 @@ export default function SwapWidget() {
         if (!quote?.intentPayload || !address) return;
         setStep('signing');
         try {
+            if (chainId !== fromToken.chainId) {
+                setError(`Please switch your wallet network to ${CHAIN_NAMES[fromToken.chainId] ?? fromToken.chainId}`);
+                setStep('error');
+                return;
+            }
             const deadline = Math.floor(Date.now() / 1000) + 1800;
             const intentMessage = {
                 ...quote.intentPayload,
                 sourceUserAddress:      address,
                 destinationUserAddress: address,
-                // Fix M-6: sourceChainId is the chain the user is currently on (where they sign)
-                sourceChainId:          chainId,
+                sourceChainId:          fromToken.chainId,
                 deadline,
             };
             const sig = await signTypedDataAsync({
                 account:     address,
-                // Fix: use wagmi's chainId (current connected chain) not fromToken.chainId
-                // These can differ if the user switches network after selecting tokens
-                domain:      { ...INTENT_DOMAIN, chainId },
+                domain:      { ...INTENT_DOMAIN, chainId: fromToken.chainId },
                 types:       INTENT_TYPES,
                 primaryType: 'BridgingIntent',
                 message:     intentMessage,
@@ -173,12 +203,13 @@ export default function SwapWidget() {
     // ── Derived ───────────────────────────────────────────────────────────────
     const isLoading     = ['quoting', 'signing', 'executing'].includes(step);
     const outputAmount  = quote
-        ? (Number(BigInt(quote.expectedOutput)) / 10 ** toToken.decimals).toFixed(6)
+        ? formatBigIntOutput(quote.expectedOutput, toToken.decimals)
         : '';
     const impactBps     = quote?.priceImpactBps ?? 0;
     const impactHigh    = impactBps > 200;   // > 2% — dangerous
     const impactMedium  = impactBps > 100;   // > 1% — warn
     const canExecute    = step === 'quoted' && (!impactHigh || highImpactAck);
+    const isWrongNetwork = isConnected && chainId !== fromToken.chainId;
 
     const amountWei = amount
         ? BigInt(Math.round(parseFloat(amount) * 10 ** fromToken.decimals)).toString()
@@ -421,6 +452,14 @@ export default function SwapWidget() {
                     ) : step === 'done' ? (
                         <button className="btn-premium" onClick={() => { reset(); setAmount(''); }}>
                             ↺ New Swap
+                        </button>
+                    ) : step === 'quoted' && isWrongNetwork ? (
+                        <button
+                            id="swap-action-btn"
+                            className="btn-premium"
+                            onClick={() => switchChain({ chainId: fromToken.chainId })}
+                        >
+                            Switch to {CHAIN_NAMES[fromToken.chainId] ?? fromToken.chainId}
                         </button>
                     ) : (
                         <button

@@ -1,6 +1,6 @@
 # @farolink/sdk
 
-The official TypeScript SDK for routing and executing cross-chain intents on the [Pharos Network](https://farolink.net).
+The official TypeScript SDK for routing and executing cross-chain intents on the [Pharos Network](https://farolink.xyz).
 
 ## Installation
 
@@ -16,7 +16,7 @@ yarn add @farolink/sdk
 import { FaroLinkClient } from '@farolink/sdk';
 
 const client = new FaroLinkClient({
-    apiKey: 'your-api-key',   // Get one at https://farolink.net/dashboard
+    apiKey: 'your-api-key',   // Get one at https://farolink.xyz/dashboard
 });
 
 // 1. Get a quote
@@ -53,7 +53,7 @@ console.log('Delivered at', final.updatedAt);
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `apiKey` | `string` | — | Enterprise API key for higher rate limits |
-| `apiUrl` | `string` | `https://api.farolink.net` | Override the API base URL |
+| `apiUrl` | `string` | `https://api.farolink.xyz` | Override the API base URL |
 | `timeoutMs` | `number` | `30000` | Per-request timeout in milliseconds |
 
 ### `client.getQuote(request)`

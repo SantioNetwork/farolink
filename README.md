@@ -18,7 +18,7 @@ When a user wants to move USDM from Ethereum to Pharos, or swap S-UST for WPHRS 
 
 | Interface | URL |
 |-----------|-----|
-| 🖥️ Swap UI | **[farolink.vercel.app](https://farolink.vercel.app)** *(deploying — link updated post-submission)* |
+| 🖥️ Swap UI | **[farolink.xyz](https://farolink.xyz)** |
 | 📖 API Docs | `http://localhost:4000/api-docs` (local) |
 | 🔗 Pharos Atlantic Testnet | [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) |
 
@@ -133,7 +133,7 @@ User Wallet
 import { FaroLinkClient } from '@farolink/sdk';
 
 const client = new FaroLinkClient({
-  apiUrl: 'https://api.farolink.net',
+  apiUrl: 'https://api.farolink.xyz',
   apiKey: 'pk_live_...',
 });
 
@@ -258,7 +258,7 @@ Each service is deployed as a separate Railway service in a single project, all 
 | `RPC_URL` | Executor | `https://testnet.dplabs-internal.com` |
 | `PORT` | API: `4000`, Router: `3001`, Executor: `3002`, Indexer: `3001` |
 | `NODE_ENV` | All | `production` |
-| `ALLOWED_ORIGINS` | API | `https://farolink.vercel.app,https://farolink.net` |
+| `ALLOWED_ORIGINS` | API | `https://farolink.xyz,https://app.farolink.xyz` |
 
 ---
 

@@ -46,13 +46,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Strings__factory>;
     getContractFactory(
-      name: "FeeCollector",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.FeeCollector__factory>;
-    getContractFactory(
       name: "FaroLinkRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FaroLinkRouter__factory>;
+    getContractFactory(
+      name: "FeeCollector",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FeeCollector__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -95,15 +95,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Strings>;
     getContractAt(
-      name: "FeeCollector",
+      name: "FaroLinkRouter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.FeeCollector>;
+    ): Promise<Contracts.FaroLinkRouter>;
     getContractAt(
-      name: "FaroLinkRouter",
+      name: "FeeCollector",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.FaroLinkRouter>;
+    ): Promise<Contracts.FeeCollector>;
 
     deployContract(
       name: "Ownable",
@@ -138,13 +138,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "FeeCollector",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.FeeCollector>;
-    deployContract(
       name: "FaroLinkRouter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FaroLinkRouter>;
+    deployContract(
+      name: "FeeCollector",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeCollector>;
 
     deployContract(
       name: "Ownable",
@@ -187,15 +187,15 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Strings>;
     deployContract(
-      name: "FeeCollector",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.FeeCollector>;
-    deployContract(
       name: "FaroLinkRouter",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FaroLinkRouter>;
+    deployContract(
+      name: "FeeCollector",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeCollector>;
 
     // default types
     getContractFactory(

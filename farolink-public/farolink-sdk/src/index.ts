@@ -107,7 +107,7 @@ export class FaroLinkClient {
 
     constructor(config: ClientConfig = {}) {
         this.client = axios.create({
-            baseURL: config.apiUrl ?? 'https://api.farolink.net',
+            baseURL: config.apiUrl ?? 'https://api.farolink.xyz',
             // Default 30s timeout — prevents callers from hanging indefinitely
             timeout: config.timeoutMs ?? 30_000,
             headers: {

@@ -5,60 +5,64 @@ import { ComplianceGate } from './ComplianceGate';
 import { getTokenMeta } from '../config/TokenRegistry';
 
 /**
- * Fix #6: Use a proper min-heap priority queue instead of array.sort().
- * TinyQueue provides O(log n) push/pop vs the previous O(n log n) per-iteration sort.
- * Also fixes the stale-entry bug by tracking best-known cost per node.
+ * Simulates one hop and returns the output amount.
+ *
+ * For DEX pools: uses the constant-product AMM formula.
+ *   The reserves already encode the correct decimal ratio between tokens,
+ *   so no additional scaling is needed.
+ *
+ * For bridges: applies the fee deduction AND scales the amount to account
+ *   for the decimal difference between the source token (on chain A) and
+ *   the destination token (on chain B). Without this scaling, e.g. bridging
+ *   USDC(BSC, 18 dec) → USDC(Pharos, 6 dec) would produce an amount that
+ *   is 10^12 times too large, making the path appear artificially superior.
  */
-class MinHeap<T extends { cost: number }> {
-    private data: T[] = [];
+function simulateHop(edge: GraphEdge, amountIn: bigint): bigint {
+    const feeBps = BigInt(edge.baseFee);
 
-    push(item: T): void {
-        this.data.push(item);
-        this._bubbleUp(this.data.length - 1);
+    if (edge.venue === 'dex_pool' && edge.reserves && edge.reserves1 &&
+        edge.reserves > 0n && edge.reserves1 > 0n) {
+        // Constant-product AMM: reserves already reflect the correct price ratio.
+        const amountInWithFee = (amountIn * (10000n - feeBps)) / 10000n;
+        return (edge.reserves1 * amountInWithFee) / (edge.reserves + amountInWithFee);
     }
 
-    pop(): T | undefined {
-        if (this.data.length === 0) return undefined;
-        const top = this.data[0];
-        const last = this.data.pop()!;
-        if (this.data.length > 0) {
-            this.data[0] = last;
-            this._sinkDown(0);
-        }
-        return top;
-    }
+    // Bridge hop: apply fee then scale for decimal difference.
+    const afterFee = (amountIn * (10000n - feeBps)) / 10000n;
 
-    get length(): number { return this.data.length; }
+    // Determine decimal places for source and destination tokens.
+    const [, fromTok] = edge.sourceId.split(':');
+    const [, toTok]   = edge.targetId.split(':');
+    const fromDec = getTokenMeta(fromTok).decimals;
+    const toDec   = getTokenMeta(toTok).decimals;
 
-    private _bubbleUp(i: number): void {
-        while (i > 0) {
-            const parent = (i - 1) >> 1;
-            if (this.data[parent].cost <= this.data[i].cost) break;
-            [this.data[parent], this.data[i]] = [this.data[i], this.data[parent]];
-            i = parent;
-        }
-    }
-
-    private _sinkDown(i: number): void {
-        const n = this.data.length;
-        while (true) {
-            let smallest = i;
-            const l = 2 * i + 1, r = 2 * i + 2;
-            if (l < n && this.data[l].cost < this.data[smallest].cost) smallest = l;
-            if (r < n && this.data[r].cost < this.data[smallest].cost) smallest = r;
-            if (smallest === i) break;
-            [this.data[i], this.data[smallest]] = [this.data[smallest], this.data[i]];
-            i = smallest;
-        }
-    }
+    const decDiff = toDec - fromDec;
+    if (decDiff === 0) return afterFee;
+    if (decDiff > 0)  return afterFee * (10n ** BigInt(decDiff));
+    return afterFee / (10n ** BigInt(-decDiff));
 }
 
-interface PathNode {
-    id:       string;  // format: "chainId:tokenAddress"
-    cost:     number;
-    depth:    number;  // Fix L-7: hop count from source, used for MAX_HOPS guard
-    prev:     PathNode | null;
-    edgeUsed: GraphEdge | null;
+function getPathWeight(path: GraphEdge[]): number {
+    return path.reduce((sum, edge) => sum + edge.weight, 0);
+}
+
+function comparePaths(pathA: GraphEdge[], pathB: GraphEdge[], outA: bigint, outB: bigint): number {
+    if (outA === 0n && outB === 0n) return 0;
+    if (outA === 0n) return 1;  // B is better
+    if (outB === 0n) return -1; // A is better
+
+    // Use ratio in basis points to compare (avoids floating point).
+    const ratioBps = (outA * 10000n) / outB;
+    if (ratioBps > 10100n) return -1; // A gives >1% more — pick A
+    if (ratioBps < 9900n)  return 1;  // B gives >1% more — pick B
+
+    // Outputs within 1%: prefer the path with lower cumulative weight
+    // (fewer hops, lower latency, lower bridge risk).
+    const weightA = getPathWeight(pathA);
+    const weightB = getPathWeight(pathB);
+    if (weightA < weightB) return -1;
+    if (weightB < weightA) return 1;
+    return 0;
 }
 
 export class PathFinder {
@@ -68,133 +72,75 @@ export class PathFinder {
     constructor(private graph: LiquidityGraph) {}
 
     public async findBestRoute(request: RouteRequest): Promise<RouteResponse | null> {
-        // Fix #5: RouteRequest now has flat fromChain/toChain + address strings
         const srcId = `${request.fromChain}:${request.fromToken.toLowerCase()}`;
         const tgtId = `${request.toChain}:${request.toToken.toLowerCase()}`;
 
-        // Fix L-7: Maximum hops must match the on-chain contract limit (executePath allows ≤5)
         const MAX_HOPS = 5;
 
         // RWA Compliance check
         const compliance = this.complianceGate.analyzeForRWA(request.fromToken.toLowerCase());
 
-        // Fix #6: Proper Dijkstra with min-heap + best-distance tracking
-        const queue = new MinHeap<PathNode>();
-        const dist  = new Map<string, number>();
-        const visited = new Set<string>();
+        // DFS: collect all simple paths from srcId → tgtId (up to MAX_HOPS hops)
+        const allPaths: GraphEdge[][] = [];
+        const visited = new Set<string>([srcId]);
+        this.findAllPaths(srcId, tgtId, MAX_HOPS, compliance, visited, [], allPaths);
 
-        queue.push({ id: srcId, cost: 0, depth: 0, prev: null, edgeUsed: null });
-        dist.set(srcId, 0);
+        // Simulate each path and find the best one
+        let bestPath: GraphEdge[] | null = null;
+        let bestOutput = 0n;
 
-        let bestNode: PathNode | null = null;
+        for (const path of allPaths) {
+            let runningOutput = request.amountIn;
+            let valid = true;
 
-        while (queue.length > 0) {
-            const current = queue.pop()!;
-
-            // Stale-entry check: skip if we've already found a cheaper path to this node
-            if (current.cost > (dist.get(current.id) ?? Infinity)) continue;
-            if (visited.has(current.id)) continue;
-            visited.add(current.id);
-
-            if (current.id === tgtId) {
-                bestNode = current;
-                break;
+            for (const edge of path) {
+                runningOutput = simulateHop(edge, runningOutput);
+                if (runningOutput <= 0n) { valid = false; break; }
             }
+            if (!valid) continue;
 
-            const neighbors = this.graph.getOutgoingEdges(current.id);
-
-            for (const edge of neighbors) {
-                // Fix L-7: Prune paths that would exceed the on-chain hop limit
-                if (current.depth >= MAX_HOPS) continue;
-
-                // RWA Rule Enforcement: drop unauthorized bridge edges
-                if (compliance.isRwa && edge.venue !== "dex_pool" && !compliance.requiredVenues.includes(edge.venue)) {
-                    continue;
-                }
-
-                let costAddition = edge.weight;
-
-                // Fix #14 dependency: use real AMM slippage if reserves are available
-                if (edge.venue === "dex_pool" && edge.reserves) {
-                    const slip = this.slippageOracle.getSlippage(
-                        edge.poolAddress ?? "0x0",
-                        request.amountIn,
-                        edge.reserves,
-                        edge.reserves1 ?? edge.reserves,
-                        edge.baseFee
-                    );
-                    costAddition += slip / 10000;
-                }
-
-                const newCost = current.cost + costAddition;
-
-                // Only enqueue if this is a cheaper path to the neighbor
-                if (newCost < (dist.get(edge.targetId) ?? Infinity)) {
-                    dist.set(edge.targetId, newCost);
-                    queue.push({
-                        id: edge.targetId,
-                        cost: newCost,
-                        depth: current.depth + 1,
-                        prev: current,
-                        edgeUsed: edge
-                    });
+            if (!bestPath) {
+                bestPath    = path;
+                bestOutput  = runningOutput;
+            } else {
+                const cmp = comparePaths(path, bestPath, runningOutput, bestOutput);
+                if (cmp < 0) {
+                    bestPath   = path;
+                    bestOutput = runningOutput;
                 }
             }
         }
 
-        if (!bestNode) return null;
+        if (!bestPath) return null;
 
-        // Reconstruct hops by backtracking from the target node
+        // Reconstruct hops from the optimal path
         const hops: Hop[] = [];
-        let curr: PathNode | null = bestNode;
-
-        // Fix #8: Track running output through hops so each hop has correct estimatedOutput
-        // We'll compute forward after reconstruction
-        const rawHops: Array<{ fromChain: string; toChain: string; fromTok: string; toTok: string; edge: GraphEdge }> = [];
-
-        while (curr && curr.edgeUsed && curr.prev) {
-            const [fromChain, fromTok] = curr.prev.id.split(':');
-            const [toChain, toTok]     = curr.id.split(':');
-            rawHops.unshift({ fromChain, toChain, fromTok, toTok, edge: curr.edgeUsed });
-            curr = curr.prev;
-        }
-
-        // Fix #8: Forward pass — compute cumulative output per hop
         let runningOutput = request.amountIn;
         let totalGas = 0n;
         let totalLatencyMs = 0;
         let totalSlippageBps = 0;
 
-        for (const raw of rawHops) {
-            const { fromChain, toChain, fromTok, toTok, edge } = raw;
+        for (const edge of bestPath) {
+            const [fromChain, fromTok] = edge.sourceId.split(':');
+            const [toChain, toTok]     = edge.targetId.split(':');
 
-            // Fix #7: Use TokenRegistry for real symbols and decimals
             const fromMeta = getTokenMeta(fromTok);
             const toMeta   = getTokenMeta(toTok);
+            const feeBps   = BigInt(edge.baseFee);
 
-            const feeBps = BigInt(edge.baseFee);
-            let hopOutput: bigint;
+            const hopOutput = simulateHop(edge, runningOutput);
 
-            // Use constant-product AMM formula when pool reserves are available.
-            // x*y=k: amountOut = (reserve1 * amountInWithFee) / (reserve0 + amountInWithFee)
-            // This correctly converts between tokens with different decimals (e.g. WETH→USDC).
-            if (edge.venue === 'dex_pool' && edge.reserves && edge.reserves1 &&
-                edge.reserves > 0n && edge.reserves1 > 0n) {
-                const amountInWithFee = (runningOutput * (10000n - feeBps)) / 10000n;
-                hopOutput = (edge.reserves1 * amountInWithFee) / (edge.reserves + amountInWithFee);
-            } else {
-                // Fallback: fee-only deduction (bridges, or pools without reserve data)
-                hopOutput = (runningOutput * (10000n - feeBps)) / 10000n;
-            }
+            const hopGas     = edge.venue === "dex_pool" ? 150000n : 250000n;
+            const hopLatency = edge.venue === "dex_pool" ? 15000   : 120000;
 
-            // Estimate per-venue gas
-            const hopGas = edge.venue === "dex_pool" ? 150000n : 250000n;
-            // Estimate per-venue latency (ms)
-            const hopLatency = edge.venue === "dex_pool" ? 15000 : 120000;
-
-            // Real slippage for this hop
             const slippageBps = edge.venue === "dex_pool" && edge.reserves && edge.reserves1
-                ? this.slippageOracle.getSlippage(edge.poolAddress ?? "0x0", runningOutput, edge.reserves, edge.reserves1, Number(feeBps))
+                ? this.slippageOracle.getSlippage(
+                    edge.poolAddress ?? "0x0",
+                    runningOutput,
+                    edge.reserves,
+                    edge.reserves1,
+                    Number(feeBps)
+                  )
                 : 0;
 
             hops.push({
@@ -217,8 +163,7 @@ export class PathFinder {
             totalSlippageBps += slippageBps;
         }
 
-
-        const slippageTolerance = BigInt(request.slippageToleranceBps ?? 50);  // default 0.5%
+        const slippageTolerance = BigInt(request.slippageToleranceBps ?? 50);
         const minAmountOut = (runningOutput * (10000n - slippageTolerance)) / 10000n;
 
         return {
@@ -227,19 +172,70 @@ export class PathFinder {
             totalGasEstimated: totalGas.toString(),
             priceImpactBps:    totalSlippageBps,
             hops,
-            // Provide intent payload for SDK/frontend to sign
             intentPayload: request.userAddress ? {
                 sourceUserAddress:      request.userAddress,
-                // Fix H-2: use distinct destination address when provided (e.g. Safe on dest chain)
                 destinationUserAddress: request.destinationUserAddress ?? request.userAddress,
                 sourceToken:            request.fromToken,
                 destinationToken:       request.toToken,
                 amountIn:               request.amountIn.toString(),
                 minAmountOut:           minAmountOut.toString(),
-                sourceChainId:          request.fromChain,  // Fix M-6: source chain for EIP-712 domain
+                sourceChainId:          request.fromChain,
                 targetChainId:          request.toChain,
                 deadline:               Math.floor(Date.now() / 1000) + 1800,
             } : undefined,
         };
+    }
+
+    private findAllPaths(
+        currentId:   string,
+        targetId:    string,
+        maxHops:     number,
+        compliance:  any,
+        visited:     Set<string>,
+        currentPath: GraphEdge[],
+        allPaths:    GraphEdge[][]
+    ): void {
+        if (currentId === targetId) {
+            allPaths.push([...currentPath]);
+            return;
+        }
+        if (currentPath.length >= maxHops) return;
+
+        const edges = this.graph.getOutgoingEdges(currentId);
+        
+        // Group and filter edges to prevent parallel bridge path explosion.
+        // For DEX pools, we keep all of them.
+        // For bridge edges, we only keep the single best compliant bridge edge to each unique targetId.
+        const filteredEdges: GraphEdge[] = [];
+        const bestBridgeMap = new Map<string, GraphEdge>();
+
+        for (const edge of edges) {
+            if (edge.venue === 'dex_pool') {
+                filteredEdges.push(edge);
+            } else {
+                // RWA compliance check
+                if (compliance.isRwa && !compliance.requiredVenues.includes(edge.venue)) {
+                    continue;
+                }
+                const existing = bestBridgeMap.get(edge.targetId);
+                if (!existing || edge.weight < existing.weight) {
+                    bestBridgeMap.set(edge.targetId, edge);
+                }
+            }
+        }
+
+        for (const edge of bestBridgeMap.values()) {
+            filteredEdges.push(edge);
+        }
+
+        for (const edge of filteredEdges) {
+            if (!visited.has(edge.targetId)) {
+                visited.add(edge.targetId);
+                currentPath.push(edge);
+                this.findAllPaths(edge.targetId, targetId, maxHops, compliance, visited, currentPath, allPaths);
+                currentPath.pop();
+                visited.delete(edge.targetId);
+            }
+        }
     }
 }

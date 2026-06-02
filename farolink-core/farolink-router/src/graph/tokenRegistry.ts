@@ -25,9 +25,9 @@ export const TOKENS: TokenInfo[] = [
   // Sources: docs.pharos.xyz token registry + Pharos team announcements (May 2026)
   // Verify at: https://atlantic.pharosscan.xyz
   {chainId:688689,address:'0x7d211F77525ea39A0592794f793cC1036eEaccD5',symbol:'WETH',  name:'Wrapped Ether',    decimals:18,logoURI:L('279/small/ethereum.png')},
-  {chainId:688689,address:'0xcfC8330f4BCAB529c625D12781b1C19466A9Fc8B',symbol:'USDC',  name:'USD Coin',         decimals:6, logoURI:L('6319/small/USD_Coin_icon.png'),  tags:['stablecoin']},
+  {chainId:688689,address:'0xe0be08c77f415f577a1b3a9ad7a1df1479564ec8',symbol:'USDC',  name:'USD Coin',         decimals:6, logoURI:L('6319/small/USD_Coin_icon.png'),  tags:['stablecoin']},
   {chainId:688689,address:'0xE7E84B8B4f39C507499c40B4ac199B050e2882d5',symbol:'USDT',  name:'Tether USD',       decimals:6, logoURI:L('325/small/Tether.png'),          tags:['stablecoin']},
-  {chainId:688689,address:'0x0c64F03EEa5c30946D5c55B4b532D08ad74638a4',symbol:'WBTC',  name:'Wrapped Bitcoin',  decimals:8, logoURI:L('7598/small/wrapped_bitcoin_wbtc.png')},
+  {chainId:688689,address:'0x0c64F03EEa5c30946D5c55B4b532D08ad74638a4',symbol:'WBTC',  name:'Wrapped Bitcoin',  decimals:18,logoURI:L('7598/small/wrapped_bitcoin_wbtc.png')},
   {chainId:688689,address:'0x838800b758277CC111B2d48Ab01e5E164f8E9471',symbol:'WPHRS', name:'Wrapped PHRS',     decimals:18,logoURI:L('279/small/ethereum.png')},
   // PHRS is the native gas token — address is the canonical wrapped representation
   {chainId:688689,address:'0x0000000000000000000000000000000000000000',symbol:'PHRS',  name:'Pharos',           decimals:18,logoURI:L('279/small/ethereum.png'),        tags:['native']},

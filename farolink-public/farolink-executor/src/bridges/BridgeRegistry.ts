@@ -29,7 +29,19 @@ export class BridgeRegistry {
     }
 
     getAdapterByName(name: string): BridgeAdapter | undefined {
-        return this.adapters.find((a) => a.name === name);
+        const normKey = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normMap: Record<string, string> = {
+            "pharosbridge": "pharos-native",
+            "pharosnative": "pharos-native",
+            "layerzero": "layerzero",
+            "debridge": "debridge",
+            "chainlinkccip": "chainlink_ccip",
+            "circlecttp": "circle_cctp",
+            "axelar": "axelar",
+            "wormhole": "wormhole"
+        };
+        const targetName = normMap[normKey] ?? name;
+        return this.adapters.find((a) => a.name === targetName);
     }
 }
 

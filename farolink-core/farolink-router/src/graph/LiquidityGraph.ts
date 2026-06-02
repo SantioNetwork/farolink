@@ -24,8 +24,15 @@ export class LiquidityGraph {
     constructor() {
         this.redis = new Redis(env.REDIS_URL, {
             maxRetriesPerRequest: 1,
-            retryStrategy:        (times) => Math.min(times * 50, 2000),
+            retryStrategy: (times) => {
+                if (times > 5) {
+                    console.warn(`[LiquidityGraph] Redis reconnect failed after ${times} attempts — giving up`);
+                    return null; // stop retrying
+                }
+                return Math.min(times * 500, 5000);
+            },
             connectTimeout:       10000,
+            enableOfflineQueue:   false,   // fail commands immediately when disconnected
             family:               4,
             tls:                  { rejectUnauthorized: false }
         });
@@ -41,15 +48,34 @@ export class LiquidityGraph {
 
         this.connectPromise = Promise.race([mainConnectPromise, connectTimeoutPromise]);
 
-        this.redis.on('connect', () => { 
+        // 'connect' fires on socket open; 'ready' fires after auth — only then can we issue commands.
+        // With enableOfflineQueue: false, running SCAN between connect→ready throws immediately.
+        this.redis.on('connect', () => {
+            console.log('[LiquidityGraph] Redis socket connected, waiting for ready...');
+        });
+
+        let hasLoggedReady = false;
+        this.redis.on('ready', () => { 
             this.redisOk = true; 
-            console.log('[LiquidityGraph] Successfully connected to Upstash Redis!');
+            if (!hasLoggedReady) {
+                console.log('[LiquidityGraph] Successfully connected to Upstash Redis!');
+                hasLoggedReady = true;
+            }
             if (resolveConnect) resolveConnect();
         });
         
         this.redis.on('error', (err) => { 
             this.redisOk = false;
-            // Suppress verbose reconnect logs but keep it failing gracefully
+            // Log rate-limit errors once, suppress reconnect spam
+            const msg = (err as Error).message ?? '';
+            if (msg.includes('max requests limit')) {
+                console.warn('[LiquidityGraph] Upstash rate limit hit — serving from cached graph');
+            }
+        });
+
+        this.redis.on('end', () => {
+            this.redisOk = false;
+            console.warn('[LiquidityGraph] Redis connection closed — serving from cached graph');
         });
     }
 
@@ -67,6 +93,17 @@ export class LiquidityGraph {
         if (this.redisOk) {
             const dexEdges = await this.loadDexEdgesFromRedis();
             this.incorporateEdges(newEdges, dexEdges);
+        } else if (this.edges.size > 0) {
+            // Redis unavailable — preserve existing DEX edges from last successful load
+            // so the router can continue serving from its cached graph
+            for (const [key, edgeList] of this.edges) {
+                for (const edge of edgeList) {
+                    if (edge.venue === 'dex_pool') {
+                        this.incorporateEdges(newEdges, [edge]);
+                    }
+                }
+            }
+            console.log('[LiquidityGraph] Redis unavailable — preserved cached DEX edges');
         }
 
         // Atomic swap
@@ -127,7 +164,7 @@ export class LiquidityGraph {
     }
 
     private async loadDexEdgesFromRedis(): Promise<GraphEdge[]> {
-        const _edges: GraphEdge[] = [];
+        const rawEdges: GraphEdge[] = [];
         try {
             let cursor = '0';
             do {
@@ -160,10 +197,12 @@ export class LiquidityGraph {
                         // Skip empty pools
                         if (reserve0 === 0n || reserve1 === 0n) continue;
 
+                        const isMock = pairAddress?.includes('mockpool') ?? false;
+
                         // Base 0.3% fee + slippage proxy weight
                         const weight = 1.003; 
 
-                        _edges.push({
+                        rawEdges.push({
                             sourceId,
                             targetId,
                             venue: "dex_pool",
@@ -174,7 +213,7 @@ export class LiquidityGraph {
                             reserves1: reserve1  // Fix: carry both reserves for AMM math
                         });
 
-                        _edges.push({
+                        rawEdges.push({
                             sourceId: reverseSourceId,
                             targetId: reverseTargetId,
                             venue: "dex_pool",
@@ -185,7 +224,7 @@ export class LiquidityGraph {
                             reserves1: reserve0  // Fix: swap reserves for reverse direction
                         });
                     } catch (e) {
-                         // Error parsing cache, skip
+                        console.warn(`[LiquidityGraph] Skipping pool ${key}: ${(e as Error).message}`);
                     }
                 }
             } while (cursor !== '0');
@@ -193,7 +232,57 @@ export class LiquidityGraph {
             console.error('[LiquidityGraph] Redis loading failed:', e);
             // Redis unavailable — return empty; bridge edges still serve routing
         }
+
+        // ── Pool deduplication: prefer mock pools over distorted testnet pools ──
+        // Testnet pools often have wildly imbalanced reserves from random users,
+        // making them appear as arbitrage opportunities. Mock pools are seeded at
+        // market-rate prices and should be preferred for accurate quoting.
+        const _edges = this.deduplicateEdges(rawEdges);
+        console.log(`[LiquidityGraph] Loaded ${_edges.length / 2} DEX pools from Redis (${_edges.length} directed edges, ${rawEdges.length - _edges.length} filtered)`);
         return _edges;
+    }
+
+    /**
+     * Deduplicates edges: when both a mock pool and a real testnet pool exist
+     * for the same token pair (sourceId → targetId), keep only the mock pool.
+     * This prevents distorted testnet pools from producing unrealistic quotes.
+     */
+    private deduplicateEdges(edges: GraphEdge[]): GraphEdge[] {
+        // Group by directed pair: sourceId→targetId
+        const pairMap = new Map<string, GraphEdge[]>();
+        for (const edge of edges) {
+            const pairKey = `${edge.sourceId}→${edge.targetId}`;
+            if (!pairMap.has(pairKey)) pairMap.set(pairKey, []);
+            pairMap.get(pairKey)!.push(edge);
+        }
+
+        const result: GraphEdge[] = [];
+        for (const [pairKey, pairEdges] of pairMap.entries()) {
+            const mockEdges = pairEdges.filter(e => e.poolAddress?.includes('mockpool'));
+            const realEdges = pairEdges.filter(e => !e.poolAddress?.includes('mockpool'));
+
+            if (mockEdges.length > 0) {
+                // Mock pool exists → use it (market-rate priced), skip distorted real pools
+                result.push(...mockEdges);
+            } else {
+                // No mock pool → use real pools, but skip extremely imbalanced ones
+                // (reserve ratio > 10000:1 suggests testnet manipulation)
+                for (const edge of realEdges) {
+                    if (edge.reserves && edge.reserves1) {
+                        const r0 = edge.reserves;
+                        const r1 = edge.reserves1;
+                        // Normalize: compare in same magnitude (shift smaller up)
+                        const ratio = r0 > r1 ? r0 / (r1 || 1n) : r1 / (r0 || 1n);
+                        if (ratio > 10000n) {
+                            console.warn(`[LiquidityGraph] Skipping imbalanced pool ${edge.poolAddress} (ratio ${ratio})`);
+                            continue;
+                        }
+                    }
+                    result.push(edge);
+                }
+            }
+        }
+        return result;
     }
 
     public getOutgoingEdges(nodeId: string): GraphEdge[] {
