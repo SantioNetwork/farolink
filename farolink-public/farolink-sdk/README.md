@@ -8,6 +8,8 @@ The official TypeScript SDK for routing and executing cross-chain intents on the
 npm install @farolink/sdk
 # or
 yarn add @farolink/sdk
+# or
+pnpm add @farolink/sdk
 ```
 
 ## Quick Start
@@ -22,7 +24,7 @@ const client = new FaroLinkClient({
 // 1. Get a quote
 const quote = await client.getQuote({
     fromChain:   1,          // Ethereum
-    toChain:     688688,     // Pharos
+    toChain:     688689,     // Pharos Atlantic Testnet
     fromToken:   '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',  // USDC on Ethereum
     toToken:     '0x...',                                         // USDC on Pharos
     amountIn:    '1000000',  // 1 USDC (6 decimals)
@@ -31,6 +33,7 @@ const quote = await client.getQuote({
 
 console.log('Expected output:', quote.expectedOutput);
 console.log('Price impact:',    quote.priceImpactBps, 'bps');
+console.log('Route score:',     quote.routeScore);
 
 // 2. Sign the intent (works with ethers v6, viem, or any EIP-712-compatible signer)
 const signed = await client.signIntent(quote.intentPayload!, ethersSigner);
@@ -58,7 +61,20 @@ console.log('Delivered at', final.updatedAt);
 
 ### `client.getQuote(request)`
 
-Returns an optimal route with expected output, gas estimates, and a pre-built `intentPayload` ready to sign.
+Returns an optimal route with expected output, gas estimates, route quality score, MEV risk assessment, and a pre-built `intentPayload` ready to sign (when `userAddress` is provided).
+
+**Request fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `fromChain` | `number` | ✓ | Source chain ID |
+| `toChain` | `number` | ✓ | Destination chain ID |
+| `fromToken` | `string` | ✓ | Source token address (0x-prefixed) |
+| `toToken` | `string` | ✓ | Destination token address (0x-prefixed) |
+| `amountIn` | `string` | ✓ | Amount in wei as a decimal string |
+| `slippageToleranceBps` | `number` | — | Max slippage in bps (default: 50 = 0.5%) |
+| `userAddress` | `string` | — | Sender address (required for intentPayload) |
+| `destinationUserAddress` | `string` | — | Recipient address if different from sender |
 
 ### `client.signIntent(intent, signer)`
 
@@ -74,11 +90,42 @@ Submits a signed intent to the executor. Returns an `ExecutionResponse` with `tr
 
 ### `client.getStatus(trackingHash)`
 
-Returns the current `StatusResponse` for a submitted intent.
+Returns the current `StatusResponse` for a submitted intent. The `trackingHash` must be a valid 0x-prefixed 64-character hex string.
 
 ### `client.trackIntent(trackingHash, opts?)`
 
-Polls until `DELIVERED` or `FAILED`. Throws `FaroLinkError` with `code: 'TRACKING_TIMEOUT'` or `code: 'INTENT_FAILED'` on failure.
+Polls until `DELIVERED` or `FAILED`. Supports external cancellation via `AbortSignal`.
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `timeoutMs` | `number` | `300000` | Max total wait time (5 minutes) |
+| `pollIntervalMs` | `number` | `5000` | Poll interval (min: 1 second) |
+| `signal` | `AbortSignal` | — | Cancel polling externally |
+
+```typescript
+// Cancellable tracking example
+const controller = new AbortController();
+const final = await client.trackIntent(hash, {
+    timeoutMs: 120_000,
+    signal: controller.signal,
+});
+
+// Cancel from elsewhere:
+controller.abort();
+```
+
+### `client.getCompliance(address, chainId?)`
+
+Returns KYC/AML compliance data for a wallet address on a specific chain.
+
+```typescript
+const compliance = await client.getCompliance('0xYourAddress', 688689);
+console.log(compliance.isKYCed, compliance.amlRisk);
+```
+
+### `client.getHealth()`
+
+Returns API infrastructure health status (API gateway, database, Redis).
 
 ## Error Handling
 
@@ -102,14 +149,19 @@ Common error codes:
 
 | Code | Meaning |
 |---|---|
-| `INVALID_INPUT` | Bad address, amount, or missing field |
+| `INVALID_INPUT` | Bad address, amount, chain ID, or missing field |
+| `INVALID_SIGNATURE` | Signer returned a malformed signature |
 | `MISSING_SIGNATURE` | Called `executeIntent` without signing first |
-| `INTENT_EXPIRED` | Intent deadline has passed |
+| `INTENT_EXPIRED` | Intent deadline has already passed |
 | `UNAUTHORIZED` | Invalid or missing API key |
 | `RATE_LIMITED` | Quota exceeded |
+| `NOT_FOUND` | Resource not found (e.g. no status for tracking hash) |
+| `REPLAY_REJECTED` | Intent was already executed (409) |
 | `INTENT_FAILED` | Bridge delivery failed on destination chain |
 | `TRACKING_TIMEOUT` | `trackIntent` timed out before delivery |
-| `API_ERROR` | Unexpected server-side error |
+| `TRACKING_ABORTED` | `trackIntent` was cancelled via AbortSignal |
+| `SERVER_ERROR` | Unexpected server-side error (5xx) |
+| `SDK_ERROR` | Unexpected SDK-side error |
 
 ## Advanced: Custom Signing
 
@@ -122,6 +174,18 @@ import { FAROLINK_INTENT_DOMAIN, FAROLINK_INTENT_TYPES } from '@farolink/sdk';
 const domain = { ...FAROLINK_INTENT_DOMAIN, chainId: intent.sourceChainId };
 const signature = await myCustomSigner.signTypedData(domain, FAROLINK_INTENT_TYPES, intentValue);
 ```
+
+## Supported Chains
+
+| Chain | ID |
+|---|---|
+| Pharos Atlantic Testnet | `688689` |
+| Ethereum | `1` |
+| Base | `8453` |
+| Arbitrum | `42161` |
+| Optimism | `10` |
+| Polygon | `137` |
+| BNB Chain | `56` |
 
 ## License
 

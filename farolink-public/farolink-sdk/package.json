@@ -1,18 +1,21 @@
 {
   "name": "@farolink/sdk",
-  "version": "1.0.0",
-  "description": "The official TypeScript SDK for routing intents on the Pharos Network",
+  "version": "1.1.0",
+  "description": "The official TypeScript SDK for routing and executing cross-chain intents on the Pharos Network via FaroLink",
   "author": "FaroLink Labs",
   "license": "MIT",
   "homepage": "https://farolink.xyz",
   "repository": {
     "type": "git",
-    "url": "https://github.com/farolink/farolink-public"
+    "url": "https://github.com/santionetwork/farolink"
   },
-  "keywords": ["pharos", "cross-chain", "bridge", "intent", "defi", "liquidity"],
+  "bugs": {
+    "url": "https://github.com/santionetwork/farolink/issues"
+  },
+  "keywords": ["pharos", "cross-chain", "bridge", "intent", "defi", "liquidity", "eip-712", "sdk"],
 
-  "main":  "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main":   "dist/index.js",
+  "types":  "dist/index.d.ts",
 
   "exports": {
     ".": {
@@ -22,12 +25,15 @@
     }
   },
 
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
+
+  "sideEffects": false,
 
   "scripts": {
     "build":           "tsc",
     "prepublishOnly":  "npm run build",
-    "typecheck":       "tsc --noEmit"
+    "typecheck":       "tsc --noEmit",
+    "clean":           "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
 
   "dependencies": {

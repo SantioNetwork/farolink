@@ -709,11 +709,12 @@
       <li><a href="#s5">Bridge Abstraction Layer</a></li>
       <li><a href="#s6">Compliance &amp; MEV Protection</a></li>
       <li><a href="#s7">Smart Contracts</a></li>
-      <li><a href="#s8">Delivery Milestones</a></li>
-      <li><a href="#s9">Revenue Model</a></li>
-      <li><a href="#s10">Grant Request &amp; Use of Funds</a></li>
-      <li><a href="#s11">Incubator Program Alignment</a></li>
-      <li><a href="#s12">Team &amp; Why Now</a></li>
+      <li><a href="#s8">Developer SDK</a></li>
+      <li><a href="#s9">Delivery Milestones</a></li>
+      <li><a href="#s10">Revenue Model</a></li>
+      <li><a href="#s11">Grant Request &amp; Use of Funds</a></li>
+      <li><a href="#s12">Incubator Program Alignment</a></li>
+      <li><a href="#s13">Team &amp; Why Now</a></li>
     </ol>
   </div>
 
@@ -960,9 +961,141 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
     <p>Both contracts are open-sourced at <code>github.com/santionetwork/farolink</code>. A formal third-party audit is the next milestone — the contracts are currently being prepared for submission to a recognised security firm.</p>
   </div>
 
-  <!-- ── 8. Milestones ── -->
+  <!-- ── 8. Developer SDK ── -->
   <div class="section" id="s8">
     <span class="section-number">08</span>
+    <h2 class="section-title">Developer SDK</h2>
+
+    <div class="callout success">
+      <div class="callout-label">✓ Production-Ready — v1.1.0</div>
+      <p><code>@farolink/sdk</code> is a fully audited TypeScript SDK that wraps the entire FaroLink API surface — routing, EIP-712 intent signing, execution, delivery tracking, and compliance — in a single <code>npm install</code>. It ships with strict input validation, structured error handling, AbortSignal support for cancellable operations, and full type safety across every response.</p>
+    </div>
+
+    <h3 class="sub-title">8.1 Installation</h3>
+    <pre>npm install @farolink/sdk
+<span class="comment"># or</span>
+yarn add @farolink/sdk
+<span class="comment"># or</span>
+pnpm add @farolink/sdk</pre>
+
+    <h3 class="sub-title">8.2 End-to-End Usage</h3>
+    <p>The SDK abstracts the entire quote → sign → execute → track lifecycle into four method calls. Compatible with ethers v6, viem, and any EIP-712-capable signer:</p>
+
+    <pre><span class="kw">import</span> { FaroLinkClient } <span class="kw">from</span> <span class="str">'@farolink/sdk'</span>;
+
+<span class="comment">// 1. Initialize</span>
+<span class="kw">const</span> client = <span class="kw">new</span> FaroLinkClient({ apiKey: <span class="str">'your-api-key'</span> });
+
+<span class="comment">// 2. Get an optimal cross-chain route</span>
+<span class="kw">const</span> quote = <span class="kw">await</span> client.getQuote({
+    fromChain:   <span class="num">1</span>,              <span class="comment">// Ethereum</span>
+    toChain:     <span class="num">688689</span>,         <span class="comment">// Pharos Atlantic</span>
+    fromToken:   <span class="str">'0xA0b8...eB48'</span>,    <span class="comment">// USDC on Ethereum</span>
+    toToken:     <span class="str">'0x...'</span>,            <span class="comment">// USDC on Pharos</span>
+    amountIn:    <span class="str">'1000000'</span>,         <span class="comment">// 1 USDC (6 decimals)</span>
+    userAddress: <span class="str">'0xYourWallet'</span>,
+});
+
+console.log(<span class="str">'Route score:'</span>, quote.routeScore);       <span class="comment">// 0–100 quality</span>
+console.log(<span class="str">'MEV risk:'</span>,    quote.mevProtection);    <span class="comment">// risk assessment</span>
+
+<span class="comment">// 3. Sign the intent (ethers v6 / viem)</span>
+<span class="kw">const</span> signed = <span class="kw">await</span> client.signIntent(quote.intentPayload!, signer);
+
+<span class="comment">// 4. Execute and track delivery</span>
+<span class="kw">const</span> result = <span class="kw">await</span> client.executeIntent(signed);
+<span class="kw">const</span> final  = <span class="kw">await</span> client.trackIntent(result.trackingHash!, {
+    timeoutMs: <span class="num">120_000</span>,   <span class="comment">// 2 minute timeout</span>
+    signal: controller.signal, <span class="comment">// cancellable via AbortSignal</span>
+});
+console.log(<span class="str">'Delivered at'</span>, final.updatedAt);</pre>
+
+    <h3 class="sub-title">8.3 Key Capabilities</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h4>Exhaustive Input Validation</h4>
+        <p>Every address, chain ID, amount, slippage, deadline, and tracking hash is validated client-side before any network call — catching misconfigurations instantly with descriptive error messages.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h4>Structured Error Handling</h4>
+        <p>All errors are <code>FaroLinkError</code> instances with HTTP <code>statusCode</code>, machine-readable <code>code</code> (e.g. RATE_LIMITED, INTENT_EXPIRED), and raw response body for clean application branching.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛑</div>
+        <h4>Cancellable Tracking</h4>
+        <p>Native <code>AbortSignal</code> support for <code>trackIntent()</code> — cancel delivery polling on React component unmount, user navigation, or external timeout without leaked promises.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <h4>Compliance Integration</h4>
+        <p><code>getCompliance(address, chainId)</code> wraps the KYC/AML endpoint, returning risk levels, RWA flags, and jurisdiction data — enabling compliance checks before initiating gated routes.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title">8.4 API Surface</h3>
+    <p>The SDK exports fully typed TypeScript interfaces for every API object. Route responses include <code>routeScore</code> (0–100 quality metric), <code>mevProtection</code> (risk level, private RPC recommendation), and per-hop <code>poolAddress</code> for DEX transparency. All uint256 values are transported as decimal strings to avoid JavaScript precision loss.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>getQuote(request)</code></td>
+            <td>Optimal multi-hop route with price impact, gas estimates, route score, MEV assessment, and signable intent payload</td>
+          </tr>
+          <tr>
+            <td><code>signIntent(intent, signer)</code></td>
+            <td>EIP-712 typed data signing — compatible with ethers v6 and viem wallet clients</td>
+          </tr>
+          <tr>
+            <td><code>executeIntent(intent)</code></td>
+            <td>Submit a signed intent for on-chain execution; returns a tracking hash for delivery polling</td>
+          </tr>
+          <tr>
+            <td><code>getStatus(trackingHash)</code></td>
+            <td>Single-poll delivery status (PENDING → BROADCASTING → DELIVERED / FAILED)</td>
+          </tr>
+          <tr>
+            <td><code>trackIntent(hash, opts?)</code></td>
+            <td>Auto-polling until delivery or failure, with configurable timeout and AbortSignal cancellation</td>
+          </tr>
+          <tr>
+            <td><code>getCompliance(address)</code></td>
+            <td>KYC/AML compliance lookup — risk level, RWA flags, jurisdiction data</td>
+          </tr>
+          <tr>
+            <td><code>getHealth()</code></td>
+            <td>Infrastructure health check (API gateway, database, Redis connectivity)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-title">8.5 Security Hardening</h3>
+    <ul class="feature-list">
+      <li><strong>Path injection prevention:</strong> <code>trackingHash</code> inputs are validated against a strict <code>0x</code> + 64 hex character format before URL interpolation — preventing path traversal attacks.</li>
+      <li><strong>Signature validation:</strong> Post-signing format checks reject malformed signatures from the signer before they reach the API.</li>
+      <li><strong>Deadline enforcement:</strong> Client-side checks reject intents with expired deadlines or deadlines exceeding the 2-hour API maximum — saving unnecessary round-trips.</li>
+      <li><strong>Replay protection:</strong> The <code>minAmountOut > amountIn</code> invariant is enforced client-side, preventing economically invalid intents from being signed.</li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-label">Open Source</div>
+      <p>The full SDK source is available at <code>github.com/santionetwork/farolink</code> under MIT license. EIP-712 domain and type constants (<code>FAROLINK_INTENT_DOMAIN</code>, <code>FAROLINK_INTENT_TYPES</code>) are exported for teams building custom signing flows outside the SDK.</p>
+    </div>
+  </div>
+
+  <!-- ── 9. Milestones ── -->
+  <div class="section" id="s9">
+    <span class="section-number">09</span>
     <h2 class="section-title">Delivery Milestones</h2>
 
     <div class="timeline">
@@ -979,7 +1112,7 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
           <h4>M2 — Execution + SDK (Week 3)</h4>
           <span class="badge-done">✓ Complete</span>
         </div>
-        <p>FaroLinkRouter.sol deployed at <code>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</code>. Executor live with 7 bridge adapters, pre-flight simulation, and fallback circuit breaker. @farolink/sdk package structure validated. EIP-712 intent signing and replay protection active.</p>
+        <p>FaroLinkRouter.sol deployed at <code>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</code>. Executor live with 7 bridge adapters, pre-flight simulation, and fallback circuit breaker. @farolink/sdk v1.1.0 production-audited with exhaustive input validation, structured error handling, and full API parity. EIP-712 intent signing and replay protection active.</p>
       </div>
 
       <div class="timeline-item done">
@@ -1008,9 +1141,9 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
     </div>
   </div>
 
-  <!-- ── 9. Revenue ── -->
-  <div class="section" id="s9">
-    <span class="section-number">09</span>
+  <!-- ── 10. Revenue ── -->
+  <div class="section" id="s10">
+    <span class="section-number">10</span>
     <h2 class="section-title">Revenue Model &amp; Sustainability</h2>
 
     <p>FaroLink is designed to be self-sustaining within 6–12 months of mainnet deployment. Revenue streams are intentionally conservative — sized for the Pharos ecosystem as it exists today, not speculative future volume.</p>
@@ -1047,9 +1180,9 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
     <p>As Pharos TVL grows, protocol fee revenue scales automatically without any additional sales or marketing effort. The grant covers the one-time cost that unlocks the first revenue stream: the audit that makes the contracts trustworthy for institutional use.</p>
   </div>
 
-  <!-- ── 10. Grant ── -->
-  <div class="section" id="s10">
-    <span class="section-number">10</span>
+  <!-- ── 11. Grant ── -->
+  <div class="section" id="s11">
+    <span class="section-number">11</span>
     <h2 class="section-title">Grant Request &amp; Use of Funds</h2>
 
     <p>We are requesting a grant from the Native to Pharos Incubator Program. This is infrastructure work — the kind that benefits every protocol on Pharos, not just FaroLink.</p>
@@ -1096,9 +1229,9 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
     </div>
   </div>
 
-  <!-- ── 11. Incubator Alignment ── -->
-  <div class="section" id="s11">
-    <span class="section-number">11</span>
+  <!-- ── 12. Incubator Alignment ── -->
+  <div class="section" id="s12">
+    <span class="section-number">12</span>
     <h2 class="section-title">Alignment with "Native to Pharos: the Builder Incubation Program"</h2>
 
     <p>FaroLink is strategically aligned with the core pillars of the <strong>Native to Pharos: the Builder Incubation Program</strong>. It fits squarely within the <strong>Innovative Infra</strong>, <strong>DeFi</strong>, and <strong>RWA/Payments</strong> innovation paths of the $10 Million Fund, serving as the foundational liquidity gateway where real-world assets meet on-chain liquidity at global scale.</p>
@@ -1115,9 +1248,9 @@ weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, sl
     <p>In accordance with the Incubator’s Milestone Setting process, FaroLink has structured its development timeline into transparent, measurable checkpoints (M1–M5). Every milestone is backed by concrete deliverables (such as the deployed contracts, the live API endpoints, and public SDK packages) ensuring highly responsible fund utilization.</p>
   </div>
 
-  <!-- ── 12. Team ── -->
-  <div class="section" id="s12">
-    <span class="section-number">12</span>
+  <!-- ── 13. Team ── -->
+  <div class="section" id="s13">
+    <span class="section-number">13</span>
     <h2 class="section-title">Team &amp; Why Now</h2>
 
     <p>Pharos mainnet launched April 28, 2026. The window to establish foundational infrastructure is open for weeks, not months. As the ecosystem grows, the cost of being second is permanent.</p>
