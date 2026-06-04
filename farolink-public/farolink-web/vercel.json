@@ -3,7 +3,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/whitepaper", "destination": "/whitepaper.html" },
+    { "source": "/((?!assets|whitepaper\\.html|favicon).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
