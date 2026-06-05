@@ -5,8 +5,12 @@ const L = (n:string) => `${CG}/${n}`;
 // Fix M-2: Detect sequential mock addresses used during testnet development.
 // Addresses like 0x0000...0001, 0x0000...0002 are placeholders — NOT real contracts.
 // This guard prevents accidentally deploying with placeholders in production.
+// NOTE: 0x0000...0000 (all zeros) is the EVM convention for native tokens (ETH, PHRS, BNB)
+// and must be explicitly excluded — it is not a mock address.
+const NATIVE_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
 const MOCK_ADDRESS_RE = /^0x0{38}[0-9a-f]{2}$/i;
 function isMockAddress(addr: string): boolean {
+  if (addr.toLowerCase() === NATIVE_TOKEN_ADDRESS) return false; // zero addr = native token sentinel
   return MOCK_ADDRESS_RE.test(addr);
 }
 

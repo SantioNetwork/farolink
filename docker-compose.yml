@@ -92,7 +92,7 @@ services:
       - ADMIN_KEY_HASH=${ADMIN_KEY_HASH}
       - PORT=4000
       - LOG_LEVEL=info
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,https://farolink.vercel.app,https://farolink.xyz,https://app.farolink.xyz}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,https://farolink.vercel.app,https://farolink.xyz,https://www.farolink.xyz,https://app.farolink.xyz}
       - NODE_ENV=${NODE_ENV:-development}
       # Fix C-1: Shared secret forwarded as x-internal-secret header to executor
       - INTERNAL_SECRET=${INTERNAL_SECRET}

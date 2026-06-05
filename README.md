@@ -284,7 +284,7 @@ Each service is deployed as a separate Railway service in a single project, link
 | `RPC_URL` | Executor | `https://testnet.dplabs-internal.com` |
 | `PORT` | API: `4000`, Router: `3001`, Executor: `3002`, Indexer: `3003` |
 | `NODE_ENV` | All | `production` |
-| `ALLOWED_ORIGINS` | API | `https://farolink.xyz,https://app.farolink.xyz` |
+| `ALLOWED_ORIGINS` | API | `https://farolink.xyz,https://www.farolink.xyz,https://app.farolink.xyz` |
 
 ---
 
