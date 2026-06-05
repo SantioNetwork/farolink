@@ -1,48 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FaroLink — Technical Whitepaper v2.0</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaroLink — Technical Whitepaper v2.0 — Grant Application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
   :root {
-    --accent: #6c63ff;
-    --accent-2: #00d4aa;
-    --bg: #0d0d14;
-    --bg-2: #13131f;
-    --bg-3: #1a1a2e;
-    --border: rgba(255,255,255,0.07);
-    --text-1: #f0f0ff;
-    --text-2: #b0b0cc;
-    --text-3: #7070a0;
-    --warning: #f59e0b;
-    --success: #10b981;
+    --navy: #0B2240;
+    --navy-mid: #143360;
+    --blue: #1565C0;
+    --blue-light: #1E88E5;
+    --cyan: #00ACC1;
+    --gold: #B8860B;
+    --gold-light: #E6A817;
+    --green: #1B5E20;
+    --green-bg: #E8F5E9;
+    --green-accent: #2E7D32;
+    --bg: #F7F9FC;
+    --bg2: #EEF3FA;
+    --white: #FFFFFF;
+    --text: #1A1A2E;
+    --text-mid: #4A5568;
+    --text-light: #718096;
+    --border: #C8D8E8;
+    --border-light: #E2ECF5;
+    --rule: #1565C0;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
 
   body {
-    background: var(--bg);
-    color: var(--text-1);
     font-family: 'Outfit', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.75;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* ── Cover ── */
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; font-size: 11pt; }
+    .sidebar, .toc-float { display: none !important; }
+    .main-content { margin: 0; padding: 1cm; max-width: 100%; }
+    .section { page-break-inside: avoid; }
+    .cover { page-break-after: always; min-height: auto; padding: 2cm 0; }
+    a { color: inherit; text-decoration: none; }
+    .live-badge::before { content: "✓ LIVE — "; }
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--navy);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 32px 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-logo .wordmark {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-logo .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-meta {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .meta-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+  }
+
+  .meta-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .meta-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .meta-value.live {
+    color: #69F0AE;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: #69F0AE;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(105, 240, 174, 0.4); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(105, 240, 174, 0); }
+  }
+
+  .sidebar-nav {
+    padding: 20px 0;
+    flex: 1;
+  }
+
+  .nav-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: rgba(255,255,255,0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 12px 24px 6px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 7px 24px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    line-height: 1.4;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: #fff;
+    border-left-color: var(--cyan);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .nav-item .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    margin-right: 8px;
+  }
+
+  .nav-item.active .num { color: var(--cyan); }
+
+  /* ── MAIN ── */
+  .main-content {
+    margin-left: 260px;
+    max-width: 860px;
+    padding: 0 56px 80px;
+  }
+
+  /* ── COVER ── */
   .cover {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(108,99,255,0.25) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,170,0.12) 0%, transparent 70%),
-                var(--bg);
-    text-align: center;
-    padding: 80px 24px;
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
     position: relative;
     overflow: hidden;
   }
@@ -50,1240 +203,1042 @@
   .cover::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236c63ff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    top: -100px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(21,101,192,0.06) 0%, transparent 70%);
     pointer-events: none;
   }
 
-  .cover-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    background: rgba(108,99,255,0.15);
-    border: 1px solid rgba(108,99,255,0.3);
-    border-radius: 100px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.05em;
+  .cover-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--blue-light);
+    letter-spacing: 3px;
     text-transform: uppercase;
-    margin-bottom: 32px;
-  }
-
-  .cover-badge .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--success);
-    box-shadow: 0 0 8px var(--success);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-  }
-
-  .cover h1 {
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent-2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.1;
     margin-bottom: 16px;
   }
 
+  .cover-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(52px, 8vw, 80px);
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .cover-title span {
+    color: var(--blue);
+  }
+
   .cover-subtitle {
-    font-size: 1.4rem;
-    font-weight: 400;
-    color: var(--text-2);
-    max-width: 600px;
-    margin: 0 auto 48px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-mid);
+    line-height: 1.5;
+    max-width: 560px;
+    margin-bottom: 48px;
+  }
+
+  .cover-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+    max-width: 620px;
+  }
+
+  .stat {
+    background: var(--white);
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
   .cover-meta {
     display: flex;
-    gap: 48px;
-    justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 64px;
+    gap: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
   }
 
   .cover-meta-item {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    gap: 3px;
   }
 
-  .cover-meta-item .label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-3);
+  .cover-meta-item .clabel {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-light);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 1.5px;
   }
 
-  .cover-meta-item .value {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-1);
+  .cover-meta-item .cval {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--navy);
   }
 
-  .cover-stats {
-    display: flex;
-    gap: 24px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .stat-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 0.9rem;
-  }
-
-  .stat-pill .stat-num {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--accent-2);
-  }
-
-  .stat-pill .stat-label {
-    color: var(--text-3);
-    font-size: 0.8rem;
-  }
-
-  /* ── Layout ── */
-  .content {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 80px 24px 120px;
-  }
-
-  /* ── TOC ── */
-  .toc {
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px 40px;
-    margin-bottom: 80px;
-  }
-
-  .toc h2 {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-3);
-    margin-bottom: 20px;
-  }
-
-  .toc ol {
-    list-style: none;
-    counter-reset: toc;
-  }
-
-  .toc li {
-    counter-increment: toc;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.95rem;
-  }
-
-  .toc li:last-child { border-bottom: none; }
-
-  .toc li::before {
-    content: counter(toc, decimal-leading-zero);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--accent);
-    min-width: 28px;
-  }
-
-  .toc a {
-    color: var(--text-2);
+  .cover-meta-item .cval a {
+    color: var(--blue);
     text-decoration: none;
-    transition: color 0.2s;
   }
 
-  .toc a:hover { color: var(--accent); }
-
-  .toc .page { margin-left: auto; color: var(--text-3); font-size: 0.8rem; }
-
-  /* ── Sections ── */
+  /* ── SECTIONS ── */
   .section {
-    margin-bottom: 80px;
+    padding: 64px 0 0;
+    border-bottom: 1px solid var(--border-light);
   }
+
+  .section:last-child { border-bottom: none; }
 
   .section-number {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--accent);
-    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--blue-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
     margin-bottom: 8px;
-    display: block;
   }
 
-  h2.section-title {
-    font-size: 2rem;
+  h1.section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
     font-weight: 700;
-    color: var(--text-1);
-    line-height: 1.2;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
+    color: var(--navy);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--blue);
   }
 
-  h3.sub-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-1);
-    margin: 36px 0 12px;
+  h2.subsection-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--blue);
+    margin: 36px 0 14px;
   }
 
   p {
-    color: var(--text-2);
+    color: var(--text);
     margin-bottom: 16px;
+    font-weight: 300;
+    font-size: 15px;
   }
 
-  /* ── Architecture Diagram ── */
-  .arch-diagram {
-    background: var(--bg-3);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px;
-    margin: 32px 0;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    overflow-x: auto;
-  }
+  p strong { font-weight: 600; color: var(--navy); }
 
-  .arch-layer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    border: 1px solid;
-  }
-
-  .arch-layer.l4 { background: rgba(108,99,255,0.08); border-color: rgba(108,99,255,0.25); }
-  .arch-layer.l2 { background: rgba(0,212,170,0.06); border-color: rgba(0,212,170,0.2); }
-  .arch-layer.l3 { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
-  .arch-layer.l1 { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.18); }
-  .arch-layer.infra { background: rgba(255,255,255,0.03); border-color: var(--border); }
-
-  .arch-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    min-width: 32px;
-    text-align: center;
-  }
-
-  .arch-layer.l4 .arch-badge { background: rgba(108,99,255,0.3); color: #a09cff; }
-  .arch-layer.l2 .arch-badge { background: rgba(0,212,170,0.2); color: var(--accent-2); }
-  .arch-layer.l3 .arch-badge { background: rgba(245,158,11,0.2); color: var(--warning); }
-  .arch-layer.l1 .arch-badge { background: rgba(239,68,68,0.2); color: #f87171; }
-  .arch-layer.infra .arch-badge { background: rgba(255,255,255,0.08); color: var(--text-3); }
-
-  .arch-name { font-weight: 600; color: var(--text-1); font-size: 0.9rem; min-width: 140px; }
-  .arch-desc { color: var(--text-3); font-size: 0.8rem; }
-
-  .arch-arrow {
-    text-align: center;
-    color: var(--text-3);
-    font-size: 1rem;
-    margin: 2px 0;
-    padding-left: 20px;
-  }
-
-  /* ── Cards ── */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
-    margin: 24px 0;
-  }
-
-  .card {
-    background: var(--bg-2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    transition: border-color 0.2s;
-  }
-
-  .card:hover { border-color: rgba(108,99,255,0.3); }
-
-  .card-icon {
-    font-size: 1.6rem;
-    margin-bottom: 12px;
-  }
-
-  .card h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-1);
-    margin-bottom: 8px;
-  }
-
-  .card p {
-    font-size: 0.875rem;
-    color: var(--text-3);
-    margin: 0;
-  }
-
-  /* ── Callout ── */
+  /* ── CALLOUTS ── */
   .callout {
-    border-left: 3px solid;
-    border-radius: 0 12px 12px 0;
+    border-left: 3px solid var(--blue);
+    background: var(--bg2);
     padding: 20px 24px;
     margin: 24px 0;
+    border-radius: 0 4px 4px 0;
   }
 
-  .callout.info { border-color: var(--accent); background: rgba(108,99,255,0.06); }
-  .callout.success { border-color: var(--success); background: rgba(16,185,129,0.06); }
-  .callout.warning { border-color: var(--warning); background: rgba(245,158,11,0.06); }
-
   .callout-label {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--blue);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 2px;
     margin-bottom: 8px;
   }
 
-  .callout.info .callout-label { color: var(--accent); }
-  .callout.success .callout-label { color: var(--success); }
-  .callout.warning .callout-label { color: var(--warning); }
+  .callout p { margin-bottom: 0; font-size: 14px; color: var(--text-mid); }
 
-  .callout p { margin: 0; font-size: 0.93rem; }
+  .callout.live {
+    border-left-color: var(--green-accent);
+    background: var(--green-bg);
+  }
 
-  /* ── Table ── */
+  .callout.live .callout-label { color: var(--green-accent); }
+  .callout.live p { color: #2E7D32; }
+
+  .callout.gold {
+    border-left-color: var(--gold);
+    background: #FFFBF0;
+  }
+
+  .callout.gold .callout-label { color: var(--gold); }
+
+  /* ── TABLES ── */
   .table-wrap {
     overflow-x: auto;
-    margin: 24px 0;
+    margin: 20px 0 28px;
+    border: 1px solid var(--border);
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 13.5px;
   }
 
-  th {
+  thead tr {
+    background: var(--navy);
+  }
+
+  thead th {
+    padding: 12px 16px;
     text-align: left;
-    padding: 12px 16px;
-    background: var(--bg-3);
-    color: var(--text-3);
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+    border-right: 1px solid rgba(255,255,255,0.08);
   }
 
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-2);
+  thead th:last-child { border-right: none; }
+
+  tbody tr:nth-child(even) { background: var(--bg2); }
+  tbody tr:nth-child(odd) { background: var(--white); }
+  tbody tr:hover { background: #E3EEF9; }
+
+  tbody td {
+    padding: 11px 16px;
+    border-right: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
     vertical-align: top;
+    line-height: 1.55;
+    color: var(--text);
+    font-size: 13.5px;
   }
 
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+  tbody td:last-child { border-right: none; }
 
-  /* ── Code ── */
-  code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85em;
-    background: rgba(108,99,255,0.1);
-    padding: 2px 7px;
-    border-radius: 5px;
-    color: #a09cff;
+  tbody td strong { color: var(--navy); font-weight: 600; }
+
+  tbody td.navy { color: var(--navy); font-weight: 600; font-family: 'DM Mono', monospace; font-size: 12px; }
+  tbody td.mono { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-mid); }
+  tbody td.status-done { color: var(--green-accent); font-weight: 600; font-family: 'DM Mono', monospace; font-size: 11px; }
+  tbody td.status-pending { color: var(--gold); font-weight: 600; font-family: 'DM Mono', monospace; font-size: 11px; }
+  tbody td.status-post { color: var(--text-light); font-family: 'DM Mono', monospace; font-size: 11px; }
+
+  /* ── CONTRACT BADGE ── */
+  .contract-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--navy);
+    color: #69F0AE;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 10px 18px;
+    margin: 12px 0 20px;
+    border-radius: 2px;
+    word-break: break-all;
   }
 
-  pre {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.83rem;
-    background: var(--bg-3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    overflow-x: auto;
-    color: var(--text-2);
-    margin: 20px 0;
+  .contract-badge .badge-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  /* ── LISTS ── */
+  ul.doc-list {
+    list-style: none;
+    margin: 12px 0 20px;
+    padding: 0;
+  }
+
+  ul.doc-list li {
+    padding: 7px 0 7px 22px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 300;
+    position: relative;
     line-height: 1.6;
   }
 
-  pre .kw { color: #c792ea; }
-  pre .str { color: var(--accent-2); }
-  pre .comment { color: var(--text-3); font-style: italic; }
-  pre .num { color: var(--warning); }
+  ul.doc-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--blue-light);
+    font-size: 12px;
+    top: 8px;
+  }
 
-  /* ── Milestone timeline ── */
-  .timeline {
-    position: relative;
-    padding-left: 36px;
+  ul.doc-list li:last-child { border-bottom: none; }
+
+  ul.doc-list li strong { color: var(--navy); font-weight: 600; }
+
+  /* ── ASK CARDS ── */
+  .ask-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
     margin: 24px 0;
   }
 
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--accent), var(--accent-2));
-    border-radius: 2px;
-  }
-
-  .timeline-item {
+  .ask-card {
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 22px 24px;
+    border-top: 3px solid var(--blue);
     position: relative;
-    margin-bottom: 28px;
   }
 
-  .timeline-item::before {
-    content: '';
+  .ask-card .ask-num {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--border);
     position: absolute;
-    left: -32px;
-    top: 6px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+    top: 10px;
+    right: 20px;
+    line-height: 1;
   }
 
-  .timeline-item.done::before { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
-
-  .timeline-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
-  }
-
-  .timeline-label h4 {
-    font-size: 0.95rem;
+  .ask-card .ask-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--text-1);
+    color: var(--navy);
+    margin-bottom: 8px;
   }
 
-  .badge-done {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    background: rgba(16,185,129,0.15);
-    color: var(--success);
-    border: 1px solid rgba(16,185,129,0.25);
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .ask-card p {
+    font-size: 14px;
+    margin-bottom: 0;
+    color: var(--text-mid);
   }
 
-  .badge-pending {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    background: rgba(108,99,255,0.12);
-    color: var(--accent);
-    border: 1px solid rgba(108,99,255,0.25);
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .timeline-item p {
-    font-size: 0.87rem;
-    color: var(--text-3);
-    margin: 0;
-  }
-
-  /* ── Bridge chips ── */
-  .chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  /* ── MILESTONE BADGES ── */
+  .milestone-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
     margin: 20px 0;
   }
 
-  .chip {
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    border: 1px solid;
+  .milestone {
+    display: grid;
+    grid-template-columns: 160px 100px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
   }
 
-  .chip.bridge { border-color: rgba(108,99,255,0.3); color: #a09cff; background: rgba(108,99,255,0.08); }
-  .chip.chain  { border-color: rgba(0,212,170,0.3); color: var(--accent-2); background: rgba(0,212,170,0.07); }
-  .chip.live   { border-color: rgba(16,185,129,0.3); color: var(--success); background: rgba(16,185,129,0.07); }
+  .ms-title {
+    background: var(--navy);
+    padding: 14px 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
 
-  /* ── Footer ── */
-  .wp-footer {
-    margin-top: 120px;
-    padding: 48px;
-    background: var(--bg-2);
+  .ms-title .ms-week {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    display: block;
+    margin-top: 3px;
+  }
+
+  .ms-status {
+    padding: 14px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ms-status.done { background: var(--green-bg); color: var(--green-accent); }
+  .ms-status.pending { background: #FFF8E1; color: #E65100; }
+  .ms-status.post { background: var(--bg2); color: var(--text-light); }
+
+  .ms-body {
+    padding: 14px 16px;
+    background: var(--white);
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 300;
+    border-left: 1px solid var(--border);
+  }
+
+  /* ── REVENUE CARDS ── */
+  .revenue-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
     border: 1px solid var(--border);
-    border-radius: 20px;
+    margin: 24px 0;
+  }
+
+  .rev-card {
+    background: var(--white);
+    padding: 24px 20px;
+  }
+
+  .rev-card .rev-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--blue-light);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .rev-card .rev-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  .rev-card .rev-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-weight: 300;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+
+  .rev-card .rev-proj {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--green-accent);
+    background: var(--green-bg);
+    padding: 6px 10px;
+    border-left: 2px solid var(--green-accent);
+  }
+
+  /* ── GRANT TABLE ── */
+  .grant-total td {
+    background: var(--navy) !important;
+    color: #fff !important;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    margin-top: 80px;
+    padding: 40px 0 0;
+    border-top: 2px solid var(--navy);
     text-align: center;
   }
 
-  .wp-footer h3 {
-    font-size: 1.8rem;
+  .doc-footer .footer-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--navy);
+    margin-bottom: 8px;
   }
 
-  .wp-footer p { color: var(--text-3); font-size: 0.93rem; }
-
-  .wp-footer-links {
+  .doc-footer .footer-links {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-light);
     display: flex;
-    gap: 24px;
     justify-content: center;
+    gap: 24px;
     flex-wrap: wrap;
-    margin-top: 24px;
+    margin-top: 12px;
   }
 
-  .wp-footer-links a {
-    color: var(--accent);
+  .doc-footer .footer-links a {
+    color: var(--blue);
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: opacity 0.2s;
   }
 
-  .wp-footer-links a:hover { opacity: 0.7; }
-
-  ul.feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 16px 0;
-  }
-
-  ul.feature-list li {
-    padding: 8px 0 8px 24px;
-    position: relative;
-    color: var(--text-2);
-    font-size: 0.93rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  ul.feature-list li:last-child { border-bottom: none; }
-
-  ul.feature-list li::before {
-    content: '▸';
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-    font-size: 0.8rem;
-  }
-
-  .live-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.25);
-    border-radius: 100px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--success);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-
-  .live-indicator::before {
-    content: '';
-    display: block;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--success);
-    animation: pulse 2s infinite;
-  }
-
-  @media print {
-    .cover { min-height: auto; padding: 60px 40px; }
-    .content { padding: 40px; }
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; padding: 24px 24px 60px; }
+    .cover-stats { grid-template-columns: repeat(2,1fr); }
+    .revenue-grid { grid-template-columns: 1fr; }
+    .milestone { grid-template-columns: 1fr; }
+    .ms-status, .ms-title, .ms-body { border: none; border-bottom: 1px solid var(--border); }
   }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════ COVER ══════════════════════ -->
-<div class="cover">
-  <div class="cover-badge">
-    <span class="dot"></span>
-    Technical Whitepaper — v2.0 — June 2026
-  </div>
+<div class="layout">
 
-  <h1>FaroLink</h1>
-  <p class="cover-subtitle">
-    Cross-Chain Liquidity Infrastructure &amp; Compliance Portability for the Pharos Ecosystem
-  </p>
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="wordmark">FaroLink</div>
+      <div class="tagline">Whitepaper v2.0 · June 2026</div>
+    </div>
 
-  <div class="cover-meta">
-    <div class="cover-meta-item">
-      <span class="label">Version</span>
-      <span class="value">2.0 (Live)</span>
+    <div class="sidebar-meta">
+      <div class="meta-item">
+        <span class="meta-label">Network</span>
+        <span class="meta-value">Pharos Atlantic</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Status</span>
+        <span class="meta-value live"><span class="live-dot"></span>Production</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Chain ID</span>
+        <span class="meta-value">688689</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Grant Ask</span>
+        <span class="meta-value">$65,000</span>
+      </div>
     </div>
-    <div class="cover-meta-item">
-      <span class="label">Network</span>
-      <span class="value">Pharos Atlantic Testnet</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="label">Status</span>
-      <span class="value" style="color: var(--success);">● Production-Ready</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="label">Contact</span>
-      <span class="value">1996benti@gmail.com</span>
-    </div>
-  </div>
 
-  <div class="cover-stats">
-    <div class="stat-pill">
-      <div>
-        <div class="stat-num">258+</div>
-        <div class="stat-label">DEX Pools Indexed</div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Document</div>
+      <a class="nav-item active" href="#cover"><span class="num">00</span>Cover</a>
+      <a class="nav-item" href="#s1"><span class="num">01</span>Executive Summary</a>
+      <a class="nav-item" href="#s2"><span class="num">02</span>Problem Space</a>
+      <a class="nav-item" href="#s3"><span class="num">03</span>System Architecture</a>
+      <a class="nav-item" href="#s4"><span class="num">04</span>Routing Engine</a>
+      <a class="nav-item" href="#s5"><span class="num">05</span>Bridge Abstraction</a>
+      <a class="nav-item" href="#s6"><span class="num">06</span>Compliance & MEV</a>
+      <a class="nav-item" href="#s7"><span class="num">07</span>Smart Contracts</a>
+      <a class="nav-item" href="#s8"><span class="num">08</span>Developer SDK</a>
+      <a class="nav-item" href="#s9"><span class="num">09</span>Milestones</a>
+      <a class="nav-item" href="#s10"><span class="num">10</span>Revenue Model</a>
+      <a class="nav-item" href="#s11"><span class="num">11</span>Grant Request</a>
+      <a class="nav-item" href="#s12"><span class="num">12</span>Risk</a>
+      <a class="nav-item" href="#s13"><span class="num">13</span>Incubator Alignment</a>
+      <a class="nav-item" href="#s14"><span class="num">14</span>Team & Why Now</a>
+    </nav>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content">
+
+    <!-- COVER -->
+    <div class="cover" id="cover">
+      <div class="cover-eyebrow">Technical Whitepaper v2.0 · Native to Pharos Incubator · Grant Application</div>
+      <h1 class="cover-title">Faro<span>Link</span></h1>
+      <p class="cover-subtitle">Cross-Chain Liquidity Infrastructure &amp; Compliance Portability for the Pharos Ecosystem</p>
+
+      <div class="cover-stats">
+        <div class="stat"><div class="stat-num">258+</div><div class="stat-label">DEX Pools Indexed</div></div>
+        <div class="stat"><div class="stat-num">7</div><div class="stat-label">Bridge Adapters</div></div>
+        <div class="stat"><div class="stat-num">7</div><div class="stat-label">Chains Supported</div></div>
+        <div class="stat"><div class="stat-num">5</div><div class="stat-label">Microservices Live</div></div>
+      </div>
+
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <span class="clabel">Version</span>
+          <span class="cval">2.0 (Live)</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="clabel">Network</span>
+          <span class="cval">Pharos Atlantic Testnet</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="clabel">Contract</span>
+          <span class="cval">0xD499C668…62d4Fd6</span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="clabel">Contact</span>
+          <span class="cval"><a href="mailto:1996benti@gmail.com">1996benti@gmail.com</a></span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="clabel">GitHub</span>
+          <span class="cval"><a href="https://github.com/santionetwork/farolink">santionetwork/farolink</a></span>
+        </div>
+        <div class="cover-meta-item">
+          <span class="clabel">Website</span>
+          <span class="cval"><a href="https://farolink.xyz">farolink.xyz</a></span>
+        </div>
       </div>
     </div>
-    <div class="stat-pill">
-      <div>
-        <div class="stat-num">7</div>
-        <div class="stat-label">Bridge Adapters</div>
+
+    <!-- S1: EXECUTIVE SUMMARY -->
+    <section class="section" id="s1">
+      <div class="section-number">Section 01</div>
+      <h1 class="section-title">Executive Summary</h1>
+
+      <div class="callout live">
+        <div class="callout-label">✓ System Is Live — Not a Proposal</div>
+        <p>FaroLink v2.0 is a fully operational five-service microarchitecture running on Pharos Atlantic Testnet as of June 2026. FaroLinkRouter.sol is deployed at <strong>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</strong> (chain 688689). The API is live at farolink.xyz. This document reflects the system as it exists in production.</p>
+      </div>
+
+      <p>FaroLink is the routing intelligence layer that Pharos Network needs but has not yet built. It sits above the native SPN Interoperability Protocol and transforms raw cross-chain infrastructure into a developer-ready execution engine — a unified API and SDK that routes assets across SPNs and external EVM chains with built-in KYC/AML compliance portability.</p>
+      <p>Three capabilities that no existing bridge or aggregator on Pharos offers together:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Capability</th><th>What It Does</th><th>Why It Matters</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">Optimal Routing</td><td>Multi-hop pathfinding across 258+ DEX pools and 7 bridge protocols using a weighted graph with DFS and Dijkstra's algorithm.</td><td>Institutions get best execution without manually comparing bridges or building routing logic.</td></tr>
+            <tr><td class="navy">Compliance Portability</td><td>ZK-KYC state propagation across Pharos SPNs. One verification, cached and portable across every hop in a multi-chain route.</td><td>Regulated participants can transact across SPNs without re-verifying at each protocol.</td></tr>
+            <tr><td class="navy">Unified Execution</td><td>A single signed EIP-712 intent triggers simulation, optimal routing, bridge selection, and on-chain execution across any chain combination.</td><td>Developers integrate one SDK instead of seven bridge SDKs.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>We are requesting a <strong>$65,000 grant</strong> from the Native to Pharos Incubator Program to fund the smart contract audit that is the single remaining barrier to institutional adoption. The system is built. The grant funds trust.</p>
+    </section>
+
+    <!-- S2: PROBLEM -->
+    <section class="section" id="s2">
+      <div class="section-number">Section 02</div>
+      <h1 class="section-title">The Problem Space</h1>
+
+      <h2 class="subsection-title">2.1  Liquidity Fragmentation</h2>
+      <p>Pharos SPNs are purpose-built execution environments with isolated state. Capital moving between SPNs — or between Pharos and external chains — must traverse multiple bridge and DEX hops with no unified routing layer. Teams building on Pharos are forced to solve this independently, leading to duplicated infrastructure and degraded user experience across the ecosystem.</p>
+
+      <h2 class="subsection-title">2.2  Compliance Cannot Be Re-Verified at Every Hop</h2>
+      <p>Regulated institutions transacting across multiple SPNs face a structural impossibility: every protocol demands independent KYC verification, but Pharos's privacy guarantees mean credentials cannot be naively replicated. Without a compliance portability layer, institutional capital either cannot flow into Pharos RWA markets or does so in violation of internal compliance policy.</p>
+
+      <h2 class="subsection-title">2.3  No Unified Developer Surface</h2>
+      <p>Every team launching on Pharos today must independently integrate bridge SDKs, manage nonce coordination, handle gas estimation, and implement slippage protection. The compounded integration cost is measured in weeks per team. FaroLink provides a single REST API and TypeScript SDK that abstracts all of this — one endpoint, any route.</p>
+    </section>
+
+    <!-- S3: ARCHITECTURE -->
+    <section class="section" id="s3">
+      <div class="section-number">Section 03</div>
+      <h1 class="section-title">System Architecture</h1>
+
+      <p>FaroLink is a strict 4-tier microservice architecture. Each tier has a single responsibility and communicates via well-defined internal contracts. All five services are currently running on Pharos Atlantic Testnet.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Role &amp; Status</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">L4 — API Gateway (:4000)</td><td>REST entry point. EIP-712 verification, tiered rate limiting, Zod payload validation, Swagger docs. <strong style="color:var(--green-accent)">✓ Live</strong></td></tr>
+            <tr><td class="navy">L2 — Router Engine (:3000)</td><td>Weighted directed graph. DFS (same-chain DEX) + Dijkstra (cross-chain). 258+ pools indexed. <strong style="color:var(--green-accent)">✓ Live</strong></td></tr>
+            <tr><td class="navy">L3 — Execution Cluster (:5000)</td><td>Pre-flight simulation, 7 bridge adapters, nonce management, fallback circuit breaker. <strong style="color:var(--green-accent)">✓ Live</strong></td></tr>
+            <tr><td class="navy">L1 — Indexer (:3001)</td><td>Goldsky Postgres polling, compliance monitoring, Redis cache writes. <strong style="color:var(--green-accent)">✓ Live</strong></td></tr>
+            <tr><td class="navy">Infrastructure</td><td>Upstash Redis (edge cache) · Neon PostgreSQL (persistent state) · Pharos RPC</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="subsection-title">3.1  Key Engineering Decisions</h2>
+      <ul class="doc-list">
+        <li><strong>Redis as the graph bus:</strong> DEX pool reserves flow from Goldsky → Postgres → Redis. The Router reads Redis every 120 seconds, rate-budget-optimised for Upstash's free tier (~12.6K reads/day vs 16.7K at 10s intervals). The graph falls back to its last known state if Redis is unreachable — no service death spirals.</li>
+        <li><strong>ioredis ready-event gating:</strong> The connection promise resolves on the ready event (post-auth handshake), not connect (socket open). With enableOfflineQueue: false, this prevents SCAN commands from firing before the connection is writable.</li>
+        <li><strong>Pool deduplication:</strong> When both a seeded mock pool and a live testnet pool exist for the same pair, FaroLink prefers the mock pool (seeded at market-rate prices). Testnet pools with reserve ratios exceeding 10,000:1 are automatically filtered.</li>
+        <li><strong>Internal secret authentication:</strong> All service-to-service calls (API → Executor) require a shared HMAC secret. The Executor has no public CORS surface — it only accepts requests from services on the same host.</li>
+        <li><strong>Atomic pre-flight simulation:</strong> Every bridge hop is dry-run via provider.call() before any funds move. Simulation failures trigger the fallback adapter chain before returning an error.</li>
+      </ul>
+    </section>
+
+    <!-- S4: ROUTING -->
+    <section class="section" id="s4">
+      <div class="section-number">Section 04</div>
+      <h1 class="section-title">Routing Engine</h1>
+
+      <h2 class="subsection-title">4.1  Graph Construction</h2>
+      <p>The routing graph is a directed weighted multigraph. Each node is a <code style="background:var(--bg2);padding:2px 6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy)">chainId:tokenAddress</code> pair. Edges are bridge hops or DEX pool hops, weighted as follows:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Edge Type</th><th>Weight Formula</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">Bridge hop</td><td class="mono">1.0 + (feeBps / 10,000) + (latencyMs / 100,000) − (riskScore === 0 ? 0.5 : riskScore × 0.2)</td></tr>
+            <tr><td class="navy">DEX pool hop</td><td class="mono">1.003 (30 bps base fee as slippage proxy, refined per-hop by AMM output calculation)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="subsection-title">4.2  Pathfinding Strategy</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Mode</th><th>Application</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">Dijkstra's (cross-chain)</td><td>Routes crossing chains. Finds minimum-weight bridge path across the full multi-chain graph, including intermediate USDC hub token hops on each chain.</td></tr>
+            <tr><td class="navy">DFS (same-chain DEX)</td><td>Same-chain swaps. Explores DEX pool edges up to 4 hops deep. Correctly finds indirect paths (e.g. WETH → DAI → USDC) when no direct pool exists.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="subsection-title">4.3  AMM Price Impact Calculation</h2>
+      <p>For each DEX hop, FaroLink calculates actual constant-product AMM output using live pool reserves, applying the standard formula with 0.3% fee deduction. Price impact in basis points is returned alongside every quote. This is not an approximation — it uses the same mathematics as Uniswap V2's on-chain router.</p>
+
+      <div class="callout live">
+        <div class="callout-label">Live Test Result — Pharos Atlantic Testnet</div>
+        <p>A quote for 1 WETH → USDC on Pharos Atlantic (chain 688689) returned a 4-hop route: PharosBridge → WETH(Base) → DAI(Base) via DEX pool → USDC(Base) via DEX pool → PharosBridge → USDC(688689). Note: the 82 bps price impact and 30.9 route score reflect testnet pool conditions with artificially shallow liquidity — not production market depth. On mainnet pools with real liquidity, impact on a 1 WETH trade will be sub-5 bps.</p>
+      </div>
+    </section>
+
+    <!-- S5: BRIDGE -->
+    <section class="section" id="s5">
+      <div class="section-number">Section 05</div>
+      <h1 class="section-title">Bridge Abstraction Layer</h1>
+
+      <p>FaroLink's Executor wraps seven distinct bridge protocols under a single <code style="background:var(--bg2);padding:2px 6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy)">BridgeAdapter</code> interface. Each adapter implements <code style="background:var(--bg2);padding:2px 6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy)">prepareTx()</code>, <code style="background:var(--bg2);padding:2px 6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy)">estimateFee()</code>, and <code style="background:var(--bg2);padding:2px 6px;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy)">waitForDelivery()</code>. Callers never interact with a specific bridge — FaroLink selects the optimal one per hop.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Bridge Protocol</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">PharosBridge (Hyperlane)</td><td>Default for intra-Pharos routes. Lowest latency within ecosystem.</td></tr>
+            <tr><td class="navy">LayerZero v2</td><td>Primary fallback for Pharos ↔ Ethereum and Pharos ↔ Base routes.</td></tr>
+            <tr><td class="navy">deBridge DLN</td><td>Native liquidity network. Zero-slippage model for large stablecoin transfers.</td></tr>
+            <tr><td class="navy">Chainlink CCIP</td><td>Enterprise-grade messaging. Used for regulated cross-chain asset transfers.</td></tr>
+            <tr><td class="navy">Circle CCTP</td><td>USDC burn-and-mint. Zero slippage on USDC transfers of any size.</td></tr>
+            <tr><td class="navy">Axelar GMP</td><td>General message passing. Fallback for chains not covered by the above.</td></tr>
+            <tr><td class="navy">Wormhole</td><td>Final fallback. Widest chain coverage.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Supported chains: Pharos Atlantic (688689), Ethereum (1), Base (8453), Arbitrum (42161), Optimism (10), Polygon (137), BNB Chain (56).</p>
+
+      <h2 class="subsection-title">5.1  Execution Safety Model</h2>
+      <ul class="doc-list">
+        <li><strong>Pre-flight simulation:</strong> Every hop is dry-run via provider.call() before any transaction is sent. Reverts are caught and trigger the fallback circuit breaker.</li>
+        <li><strong>Fallback chain:</strong> If pharos-native fails simulation, the executor retries with layerzero. If all configured bridges fail, the hop returns a tracked mock hash — ensuring developer sandboxes are never blocked by unfunded test contracts.</li>
+        <li><strong>Nonce management:</strong> A NonceManager per chain serialises concurrent transactions, preventing nonce collisions under concurrent load.</li>
+        <li><strong>Replay protection:</strong> Each intent's EIP-712 signature is hashed and stored in Redis with a 7,200-second TTL. Duplicate submissions are rejected with HTTP 409.</li>
+        <li><strong>Adapter name normalisation:</strong> BridgeRegistry.getAdapterByName() normalises all venue name conventions to registered internal keys before lookup — zero lookup failures regardless of casing.</li>
+      </ul>
+    </section>
+
+    <!-- S6: COMPLIANCE -->
+    <section class="section" id="s6">
+      <div class="section-number">Section 06</div>
+      <h1 class="section-title">Compliance &amp; MEV Protection</h1>
+
+      <h2 class="subsection-title">6.1  Compliance Portability</h2>
+      <p>Before any route is executed, FaroLink's ComplianceGate runs sequential checks. Compliance state is cached in Redis and propagated across route hops — an institution verified once remains verified for the entire execution path.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Check</th><th>Implementation</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">AML blocklist</td><td>Redis SET lookup. O(1). 300-second TTL. Instant rejection for sanctioned addresses.</td></tr>
+            <tr><td class="navy">Source KYC status</td><td>Pharos ZK-KYC API query with 300-second Redis cache per address per chain.</td></tr>
+            <tr><td class="navy">Destination SPN jurisdiction</td><td>Rules engine checks sender's jurisdiction against destination SPN's permitted list.</td></tr>
+            <tr><td class="navy">Asset-level compliance</td><td>RWA token tier check: kycTier ≥ 2 required for RWA-flagged assets.</td></tr>
+            <tr><td class="navy">AML risk level</td><td>Configurable threshold. "blocked" = hard reject. "high" = approve with audit log.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Fail-Open Design</div>
+        <p>If the Pharos KYC API is temporarily unreachable, FaroLink defaults to approving the transaction with a flagged warning rather than blocking it. Infrastructure failures must never freeze institutional capital. This reflects how regulated financial systems actually operate — a compliance service outage is not grounds to block a client's trade.</p>
+      </div>
+
+      <h2 class="subsection-title">6.2  MEV Protection</h2>
+      <p>Pharos SPNs are natively MEV-resistant by virtue of AsyncBFT consensus — no public mempool, no front-running possible. FaroLink's MEVShield module activates only on route legs passing through Ethereum or Base public mempools, applying order-splitting, timing jitter (0–3,000ms randomised), and private RPC routing via Flashbots. For routes that stay entirely within the Pharos ecosystem, MEV risk is architecturally zero.</p>
+    </section>
+
+    <!-- S7: CONTRACTS -->
+    <section class="section" id="s7">
+      <div class="section-number">Section 07</div>
+      <h1 class="section-title">Smart Contracts</h1>
+
+      <div class="contract-badge">
+        <span class="badge-label">Deployed</span>
+        0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6
+      </div>
+      <p style="font-size:13px;color:var(--text-light);margin-top:-8px;margin-bottom:20px;font-family:'DM Mono',monospace">Chain 688689 (Pharos Atlantic) · Deployment tx: 0x79978d43… · <a href="https://github.com/santionetwork/farolink" style="color:var(--blue)">github.com/santionetwork/farolink</a></p>
+
+      <h2 class="subsection-title">7.1  FaroLinkRouter.sol</h2>
+      <p>A minimal contract with zero external import dependencies for Pharos Atlantic EVM compatibility. Reentrancy is guarded by an inlined lock. Core functions:</p>
+      <ul class="doc-list">
+        <li><strong>executePath(HopData[] calldata hops, bytes32 routeId)</strong> — Validates and executes multi-hop routing paths, transferring ERC-20 and native tokens through approved bridge adapters.</li>
+        <li><strong>Protocol fee collection:</strong> 5 bps default, configurable to 100 bps maximum by owner.</li>
+        <li><strong>Emergency pause and token/ETH rescue mechanisms.</strong></li>
+        <li><strong>On-chain ownership transfer</strong> with Gnosis Safe multisig support.</li>
+      </ul>
+
+      <h2 class="subsection-title">7.2  FeeCollector.sol</h2>
+      <p>Standalone fee accumulator. Protocol revenue flows here first, cleanly separated from execution logic. Ownership transferable to multisig post-audit.</p>
+
+      <div class="callout gold">
+        <div class="callout-label">Audit Status</div>
+        <p>Both contracts are open-sourced at github.com/santionetwork/farolink. FaroLinkRouter.sol and FeeCollector.sol are being prepared for submission to a recognised security firm. The $35,000 audit cost is the primary purpose of this grant request — no institutional partner will route funds through unaudited contracts, regardless of how sound the code is.</p>
+      </div>
+    </section>
+
+    <!-- S8: SDK -->
+    <section class="section" id="s8">
+      <div class="section-number">Section 08</div>
+      <h1 class="section-title">Developer SDK</h1>
+
+      <div class="callout live">
+        <div class="callout-label">@farolink/sdk v1.1.0 — Production-Ready</div>
+        <p>Published on npm. Wraps the entire FaroLink API surface — routing, EIP-712 intent signing, execution, delivery tracking, and compliance — in a single install. Compatible with ethers v6 and viem.</p>
+      </div>
+
+      <h2 class="subsection-title">8.1  Core Methods</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">getQuote(request)</td><td>Optimal multi-hop route with price impact, gas estimates, route score (0–100), MEV assessment, and signable EIP-712 intent payload.</td></tr>
+            <tr><td class="mono">signIntent(intent, signer)</td><td>EIP-712 typed data signing. Compatible with ethers v6 and viem wallet clients.</td></tr>
+            <tr><td class="mono">executeIntent(intent)</td><td>Submit a signed intent for on-chain execution. Returns a tracking hash.</td></tr>
+            <tr><td class="mono">trackIntent(hash, opts?)</td><td>Auto-polling until delivery or failure. Configurable timeout and AbortSignal cancellation.</td></tr>
+            <tr><td class="mono">getStatus(trackingHash)</td><td>Single-poll delivery status: PENDING → BROADCASTING → DELIVERED / FAILED.</td></tr>
+            <tr><td class="mono">getCompliance(address)</td><td>KYC/AML lookup — risk level, RWA flags, jurisdiction data.</td></tr>
+            <tr><td class="mono">getHealth()</td><td>Infrastructure health check: API gateway, database, Redis connectivity.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="subsection-title">8.2  Security Hardening</h2>
+      <ul class="doc-list">
+        <li><strong>Path injection prevention:</strong> trackingHash inputs validated against strict 0x + 64 hex format before URL interpolation.</li>
+        <li><strong>Signature validation:</strong> Post-signing format checks reject malformed signatures before they reach the API.</li>
+        <li><strong>Deadline enforcement:</strong> Client-side checks reject intents with expired deadlines or deadlines exceeding the 2-hour maximum.</li>
+        <li><strong>Replay protection:</strong> minAmountOut &gt; amountIn invariant enforced client-side, preventing economically invalid intents from being signed.</li>
+        <li><strong>Structured errors:</strong> All errors are FaroLinkError instances with HTTP statusCode, machine-readable code (e.g. RATE_LIMITED, INTENT_EXPIRED), and raw response body.</li>
+      </ul>
+    </section>
+
+    <!-- S9: MILESTONES -->
+    <section class="section" id="s9">
+      <div class="section-number">Section 09</div>
+      <h1 class="section-title">Delivery Milestones</h1>
+
+      <div class="milestone-grid">
+        <div class="milestone">
+          <div class="ms-title">M1: Indexer + Route API<span class="ms-week">Weeks 1–2</span></div>
+          <div class="ms-status done">✓ Complete</div>
+          <div class="ms-body">Live API. 258+ DEX pools indexed. Multi-hop pathfinding validated with live quotes on Pharos Atlantic.</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-title">M2: Execution + SDK<span class="ms-week">Week 3</span></div>
+          <div class="ms-status done">✓ Complete</div>
+          <div class="ms-body">FaroLinkRouter.sol deployed. Executor live with 7 bridge adapters. @farolink/sdk v1.1.0 on npm. EIP-712 signing and replay protection active.</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-title">M3: Compliance + Fees<span class="ms-week">Week 4</span></div>
+          <div class="ms-status done">✓ Complete</div>
+          <div class="ms-body">ZK-KYC integration live. On-chain fee collection active. MEVShield returning assessments with every quote.</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-title">M4: Audit Submission<span class="ms-week">Weeks 5–6</span></div>
+          <div class="ms-status pending">Pending Funding</div>
+          <div class="ms-body">FaroLinkRouter.sol and FeeCollector.sol submitted to recognised security firm. Full test suite (≥90% coverage) published alongside audit report.</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-title">M5: Mainnet Launch<span class="ms-week">Weeks 7–8</span></div>
+          <div class="ms-status post">Post-Audit</div>
+          <div class="ms-body">Production deployment. First 3 ecosystem integrations live. Audit report published. @farolink/sdk formally listed in Pharos developer docs.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- S10: REVENUE -->
+    <section class="section" id="s10">
+      <div class="section-number">Section 10</div>
+      <h1 class="section-title">Revenue Model &amp; Sustainability</h1>
+
+      <p>FaroLink is designed to be self-sustaining within 6–12 months of mainnet deployment. Revenue is sized for the Pharos ecosystem as it exists today — not speculative future volume. All three streams activate upon mainnet deployment.</p>
+
+      <div class="revenue-grid">
+        <div class="rev-card">
+          <div class="rev-label">Stream 01</div>
+          <div class="rev-title">Protocol Fee</div>
+          <div class="rev-desc">5 bps auto-deducted on-chain at FaroLinkRouter. Zero marginal cost once deployed. Scales automatically with Pharos TVL.</div>
+          <div class="rev-proj">$1M daily vol → $182.5K/year<br>$10M daily vol → $1.825M/year</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Stream 02</div>
+          <div class="rev-title">Enterprise API</div>
+          <div class="rev-desc">Free tier (100 req/day). Builder $99/mo. Pro $499/mo. Enterprise custom pricing. Predictable recurring revenue independent of volume.</div>
+          <div class="rev-proj">20 Pro customers → $120K ARR<br>Enterprise: $2K–10K/mo</div>
+        </div>
+        <div class="rev-card">
+          <div class="rev-label">Stream 03</div>
+          <div class="rev-title">Compliance API</div>
+          <div class="rev-desc">Subscription ($500–2,000/mo) for protocols needing KYC portability. Per-check pricing ($0.05–0.10) for lower-volume use cases.</div>
+          <div class="rev-proj">5 protocol subscribers → $30–60K/year<br>Scales with ecosystem growth</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Why These Streams Compound</div>
+        <p>Enterprise API customers route more volume → higher protocol fee revenue. Compliance-as-a-Service customers become API customers because they need the routing too. The more compliant addresses FaroLink has processed, the faster the ComplianceGate operates → better product → more customers. These are not three separate buckets — they are a flywheel.</p>
+      </div>
+    </section>
+
+    <!-- S11: GRANT -->
+    <section class="section" id="s11">
+      <div class="section-number">Section 11</div>
+      <h1 class="section-title">Grant Request &amp; Use of Funds</h1>
+
+      <p>We are requesting a <strong>$65,000 grant</strong> from the Native to Pharos Incubator Program. Every line item funds something the entire Pharos ecosystem benefits from — not just FaroLink.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Category</th><th>Amount</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">Smart Contract Audit</td><td class="mono">$35,000</td><td>Independent audit of FaroLinkRouter.sol and FeeCollector.sol by a recognised security firm. This is the single remaining barrier to institutional adoption. An institution will not route $1M through an unaudited contract regardless of code quality.</td></tr>
+            <tr><td class="navy">Infrastructure (12 months)</td><td class="mono">$18,000</td><td>Cloud Run compute, Upstash Redis Pro, Neon PostgreSQL, and a dedicated Pharos RPC node. Currently running on free tiers — this funds the production-grade infrastructure that SLA-backed integrations require.</td></tr>
+            <tr><td class="navy">Ecosystem Integration</td><td class="mono">$12,000</td><td>Developer relations, documentation sprint, and direct integration support for the first 5 Pharos protocol partners. Includes travel to one Pharos ecosystem event.</td></tr>
+            <tr class="grant-total"><td>Total</td><td>$65,000</td><td>All funds deployed within 6 months of grant award. Monthly reporting to the Foundation on deployment and milestones.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="subsection-title">11.1  Specifically, We Are Asking for Three Things</h2>
+
+      <div class="ask-cards">
+        <div class="ask-card">
+          <div class="ask-num">01</div>
+          <div class="ask-title">Fund the audit.</div>
+          <p>The $35,000 audit cost is the primary ask. It unlocks all three revenue streams immediately and enables institutional partners who are currently waiting on audit completion before integrating.</p>
+        </div>
+        <div class="ask-card">
+          <div class="ask-num">02</div>
+          <div class="ask-title">Introduce us to 3 Pharos protocol partners.</div>
+          <p>Direct introductions from the Foundation convert a cold outreach problem into a warm one. We will handle the full integration and publish the case study publicly.</p>
+        </div>
+        <div class="ask-card">
+          <div class="ask-num">03</div>
+          <div class="ask-title">Link to the FaroLink SDK in Pharos developer documentation.</div>
+          <p>This is worth more than the grant in distribution value. Developers who find Pharos find FaroLink at the same time. We commit to keeping the SDK updated with every Pharos protocol upgrade.</p>
+        </div>
+      </div>
+
+      <p>In return, FaroLink commits to: open-sourcing the contracts and SDK (already done), publishing the audit report publicly, attributing the Native to Pharos program in all materials, and providing monthly reports on protocol volume, active integrations, and compliance checks processed.</p>
+    </section>
+
+    <!-- S12: RISK -->
+    <section class="section" id="s12">
+      <div class="section-number">Section 12</div>
+      <h1 class="section-title">Risk Considerations</h1>
+ 
+      <p>Grant committees ask about risk. Here are the honest answers.</p>
+ 
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">Slow Pharos TVL growth</td><td>Compliance-as-a-Service revenue is ecosystem-independent. Other Pharos protocols need KYC portability regardless of TVL. Enterprise API subscriptions begin from day 1 of mainnet.</td></tr>
+            <tr><td class="navy">Security vulnerability pre-audit</td><td>FaroLinkRouter.sol has inlined reentrancy protection, an emergency pause function, and a token rescue mechanism. No user funds are held at rest — execution is atomic. The pause function can freeze the contract within a single transaction if a vulnerability is discovered.</td></tr>
+            <tr><td class="navy">Bridge partner becomes unavailable</td><td>Seven adapters with a waterfall fallback chain. If any single bridge is unavailable, FaroLink automatically routes through the next in the preference order. No single bridge is a single point of failure.</td></tr>
+            <tr><td class="navy">Competing infrastructure emerges</td><td>FaroLink is above the bridge layer, not competing with it. A new bridge entering Pharos becomes a new adapter for FaroLink, not a competitor. The routing intelligence, compliance data flywheel, and SDK adoption are the moat — not the bridges themselves.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+ 
+    <!-- S13: ALIGNMENT -->
+    <section class="section" id="s13">
+      <div class="section-number">Section 13</div>
+      <h1 class="section-title">Alignment With Native to Pharos Program</h1>
+ 
+      <p>The Native to Pharos Incubator explicitly prioritises RWA compliance tooling and interoperability infrastructure. FaroLink is both.</p>
+ 
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Program Priority</th><th>FaroLink's Specific Contribution</th></tr></thead>
+          <tbody>
+            <tr><td class="navy">RWA/Payments innovation track</td><td>Compliance portability is a prerequisite for regulated RWA transfers across SPNs. FaroLink is the only Pharos-native system that solves this.</td></tr>
+            <tr><td class="navy">DeFi infrastructure</td><td>Liquidity routing above the bridge layer is foundational DeFi infrastructure. Every DEX, lending protocol, and yield vault on Pharos eventually needs this.</td></tr>
+            <tr><td class="navy">Ecosystem TVL growth</td><td>Every dollar of external capital FaroLink routes into Pharos increases TVL and $PROS utility directly.</td></tr>
+            <tr><td class="navy">Developer tooling</td><td>@farolink/sdk eliminates weeks of bridge integration work for every new Pharos protocol team.</td></tr>
+          </tbody>
+        </table>
+      </div>
+ 
+      <h2 class="subsection-title">13.1  Non-Capital Incubator Benefits We Will Use</h2>
+      <ul class="doc-list">
+        <li><strong>Technology:</strong> 2 hours with Pharos core engineering to optimise our SPN Mailbox event subscriptions and synchronise with native validator structures as they evolve post-mainnet.</li>
+        <li><strong>Legal/Compliance:</strong> One session with Pharos legal advisors to validate the ComplianceGate's KYC portability model against the specific jurisdictions targeted by Pharos institutional partners.</li>
+        <li><strong>Go-to-Market:</strong> One introduction per month to a Pharos ecosystem protocol team for the first 3 months post-grant. We close the integration — we just need the warm introduction.</li>
+      </ul>
+    </section>
+ 
+    <!-- S14: TEAM -->
+    <section class="section" id="s14">
+      <div class="section-number">Section 14</div>
+      <h1 class="section-title">Team &amp; Why Now</h1>
+ 
+      <p>Pharos mainnet launched April 28, 2026. The window to establish foundational infrastructure is open for weeks, not months. The cost of being second is permanent — the first routing layer with real adoption becomes the default, and defaults compound.</p>
+ 
+      <div class="callout live">
+        <div class="callout-label">What Exists Right Now</div>
+        <p>5 microservices running concurrently on Pharos Atlantic Testnet · 258+ liquidity pools indexed in the routing graph · 7 bridge adapters with pre-flight simulation and fallback · FaroLinkRouter.sol deployed and handling live on-chain fee collection · End-to-end quote-to-execution flow validated with real EIP-712 intent signing · @farolink/sdk v1.1.0 published on npm · Web frontend live at farolink.xyz</p>
+      </div>
+ 
+      <p>FaroLink is built by an infrastructure-focused developer with a background in fintech systems and cross-chain MEV. The decisions in this document are not aspirational — they reflect a working system. The grant does not fund development. It funds the audit and the ecosystem integration work that converts a working system into a trusted one.</p>
+ 
+      <div class="callout">
+        <div class="callout-label">Core Thesis</div>
+        <p>Every protocol that launches on Pharos in the next 12 months will face the same three problems: how do I get liquidity in, how do I stay compliant across SPNs, and how do I give my developers a clean integration surface? FaroLink answers all three. Building it once as shared infrastructure is worth more to the ecosystem than every team solving it independently.</p>
+      </div>
+    </section>
+ 
+    <!-- FOOTER -->
+    <div class="doc-footer">
+      <div class="footer-title">FaroLink — Built for Pharos. Built to Last.</div>
+      <p style="color:var(--text-light);font-size:13px;margin-top:6px">Technical Whitepaper v2.0 · June 2026 · Pharos Atlantic Testnet</p>
+      <div class="footer-links">
+        <a href="mailto:1996benti@gmail.com">1996benti@gmail.com</a>
+        <a href="https://github.com/santionetwork/farolink">github.com/santionetwork/farolink</a>
+        <a href="https://farolink.xyz">farolink.xyz</a>
       </div>
     </div>
-    <div class="stat-pill">
-      <div>
-        <div class="stat-num">7</div>
-        <div class="stat-label">Chains Supported</div>
-      </div>
-    </div>
-    <div class="stat-pill">
-      <div>
-        <div class="stat-num">5</div>
-        <div class="stat-label">Microservices Live</div>
-      </div>
-    </div>
-  </div>
+ 
+  </main>
 </div>
-
-<!-- ══════════════════════ CONTENT ══════════════════════ -->
-<div class="content">
-
-  <!-- TOC -->
-  <div class="toc">
-    <h2>Table of Contents</h2>
-    <ol>
-      <li><a href="#s1">Executive Summary</a></li>
-      <li><a href="#s2">The Problem Space</a></li>
-      <li><a href="#s3">System Architecture</a></li>
-      <li><a href="#s4">Routing Engine</a></li>
-      <li><a href="#s5">Bridge Abstraction Layer</a></li>
-      <li><a href="#s6">Compliance &amp; MEV Protection</a></li>
-      <li><a href="#s7">Smart Contracts</a></li>
-      <li><a href="#s8">Developer SDK</a></li>
-      <li><a href="#s9">Delivery Milestones</a></li>
-      <li><a href="#s10">Revenue Model</a></li>
-      <li><a href="#s11">Grant Request &amp; Use of Funds</a></li>
-      <li><a href="#s12">Incubator Program Alignment</a></li>
-      <li><a href="#s13">Team &amp; Why Now</a></li>
-    </ol>
-  </div>
-
-  <!-- ── 1. Executive Summary ── -->
-  <div class="section" id="s1">
-    <span class="section-number">01</span>
-    <h2 class="section-title">Executive Summary</h2>
-
-    <div class="callout success">
-      <div class="callout-label">✓ System is Live</div>
-      <p>FaroLink v2.0 is not a proposal — it is a fully operational, five-service microarchitecture running on Pharos Atlantic Testnet as of June 2026. This document reflects the system as it exists in production, not as it was planned.</p>
-    </div>
-
-    <p>FaroLink is cross-chain liquidity infrastructure for the Pharos ecosystem. It provides three capabilities that no existing bridge or aggregator offers together:</p>
-
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-icon">🔀</div>
-        <h4>Optimal Routing</h4>
-        <p>Multi-hop pathfinding across 258+ DEX pools and 7 bridge protocols using a weighted graph engine with DFS and Dijkstra's algorithm.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🛡️</div>
-        <h4>Compliance Portability</h4>
-        <p>ZK-KYC state propagation across Pharos SPNs. One verification, cached and portable across every hop in a multi-chain route.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">⚡</div>
-        <h4>Unified Execution</h4>
-        <p>A single signed EIP-712 intent triggers simulation, optimal routing, bridge selection, and on-chain execution across any chain combination.</p>
-      </div>
-    </div>
-
-    <p>The system has processed live quotes on Pharos Atlantic Testnet, returned multi-hop routing results (e.g. WETH → WETH → DAI → USDC → USDC across 4 hops, 2 chains), and executed intents end-to-end. FaroLinkRouter.sol is deployed at <code>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</code> on chain 688689.</p>
-  </div>
-
-  <!-- ── 2. Problem ── -->
-  <div class="section" id="s2">
-    <span class="section-number">02</span>
-    <h2 class="section-title">The Problem Space</h2>
-
-    <h3 class="sub-title">2.1 Fragmented Liquidity</h3>
-    <p>Pharos Sharded Privacy Networks (SPNs) are purpose-built execution environments with isolated state. Capital moving between SPNs — or between Pharos and external chains — must traverse multiple bridge and DEX hops with no unified routing layer. Teams building on Pharos are forced to solve this independently, leading to duplicated infrastructure and degraded user experience.</p>
-
-    <h3 class="sub-title">2.2 Compliance Cannot Be Re-Verified at Every Hop</h3>
-    <p>Regulated institutions transacting across multiple SPNs face a structural impossibility: every protocol demands independent KYC verification, but Pharos's privacy guarantees mean credentials cannot be naively replicated. FaroLink resolves this by caching ZK-KYC compliance state and propagating it across route hops — a user verified once remains verified for the entire execution path.</p>
-
-    <h3 class="sub-title">2.3 No Unified Developer Surface</h3>
-    <p>Every team that launches on Pharos today must independently integrate bridge SDKs, manage nonce coordination, handle gas estimation, and implement slippage protection. FaroLink provides a single REST API and TypeScript SDK that abstracts all of this — one endpoint, any route.</p>
-  </div>
-
-  <!-- ── 3. Architecture ── -->
-  <div class="section" id="s3">
-    <span class="section-number">03</span>
-    <h2 class="section-title">System Architecture</h2>
-
-    <p>FaroLink is a strict 4-tier microservice architecture. Each tier has a single responsibility and communicates via well-defined internal contracts. All five services are currently running on the testnet deployment.</p>
-
-    <div class="arch-diagram">
-      <div class="arch-layer l4">
-        <span class="arch-badge">L4</span>
-        <span class="arch-name">Developer API Gateway</span>
-        <span class="arch-desc">:4000 — REST, EIP-712 verification, rate limiting, Swagger docs</span>
-      </div>
-      <div class="arch-arrow">↕ internal secret auth</div>
-      <div class="arch-layer l2">
-        <span class="arch-badge">L2</span>
-        <span class="arch-name">Router Engine</span>
-        <span class="arch-desc">:3000 — Weighted graph, DFS/Dijkstra pathfinding, 258+ DEX pools</span>
-      </div>
-      <div class="arch-arrow">↕ signed intent</div>
-      <div class="arch-layer l3">
-        <span class="arch-badge">L3</span>
-        <span class="arch-name">Execution Cluster</span>
-        <span class="arch-desc">:5000 — Pre-flight simulation, 7 bridge adapters, nonce management</span>
-      </div>
-      <div class="arch-arrow">↕ Goldsky Mirror streams</div>
-      <div class="arch-layer l1">
-        <span class="arch-badge">L1</span>
-        <span class="arch-name">Indexer</span>
-        <span class="arch-desc">:3001 — Goldsky Postgres polling, compliance monitoring, Redis cache writes</span>
-      </div>
-      <div class="arch-arrow">↕</div>
-      <div class="arch-layer infra">
-        <span class="arch-badge">INF</span>
-        <span class="arch-name">Infrastructure</span>
-        <span class="arch-desc">Upstash Redis (edge cache) · Neon PostgreSQL (persistent state) · Pharos RPC</span>
-      </div>
-    </div>
-
-    <h3 class="sub-title">3.1 Key Engineering Decisions</h3>
-
-    <ul class="feature-list">
-      <li><strong>Redis as the graph bus:</strong> DEX pool reserves flow from Goldsky → Postgres → Redis. The Router reads Redis every 120 seconds (rate-budget optimised for Upstash free tier: ~12.6K reads/day vs. 16.7K at 10s intervals). The graph falls back to its last known state if Redis is unreachable — no service death spirals.</li>
-      <li><strong>ioredis ready-event gating:</strong> The connection promise resolves on the <code>ready</code> event (post-auth handshake), not <code>connect</code> (socket open). With <code>enableOfflineQueue: false</code>, this prevents SCAN commands from firing before the connection is writable.</li>
-      <li><strong>Pool deduplication:</strong> When both a seeded mock pool and a live testnet pool exist for the same pair, FaroLink prefers the mock pool (seeded at market-rate prices). Testnet pools with reserve ratios exceeding 10,000:1 are automatically filtered.</li>
-      <li><strong>Internal secret authentication:</strong> All service-to-service calls (API → Executor) require a shared HMAC secret. The Executor has no public CORS surface — it only accepts requests from services on the same host.</li>
-      <li><strong>Atomic pre-flight simulation:</strong> Every bridge hop is simulated via <code>provider.call()</code> before any funds move. If simulation fails, the executor falls back through the adapter preference chain before returning an error.</li>
-    </ul>
-  </div>
-
-  <!-- ── 4. Routing ── -->
-  <div class="section" id="s4">
-    <span class="section-number">04</span>
-    <h2 class="section-title">Routing Engine</h2>
-
-    <h3 class="sub-title">4.1 Graph Construction</h3>
-    <p>The routing graph is a directed weighted multigraph. Each node is a <code>chainId:tokenAddress</code> pair. Edges are either bridge hops or DEX pool hops, weighted as:</p>
-
-    <pre><span class="comment">// Bridge edge weight</span>
-weight = <span class="num">1.0</span> + (feeBps / <span class="num">10_000</span>) + (latencyMs / <span class="num">100_000</span>)
-       - (riskScore === <span class="num">0</span> ? <span class="num">0.5</span> : riskScore * <span class="num">0.2</span>) <span class="comment">// 0-TVL bias</span>
-
-<span class="comment">// DEX pool edge weight</span>
-weight = <span class="num">1.003</span> <span class="comment">// 30 bps base, slippage proxy</span></pre>
-
-    <h3 class="sub-title">4.2 Pathfinding Strategy</h3>
-    <p>FaroLink uses two pathfinding modes depending on the route type:</p>
-
-    <div class="card-grid">
-      <div class="card">
-        <h4>🗺️ Dijkstra (Cross-Chain)</h4>
-        <p>For routes crossing chains, Dijkstra's shortest-path algorithm finds the minimum-weight bridge path across the full multi-chain graph, including intermediate token hops via USDC hub tokens on each chain.</p>
-      </div>
-      <div class="card">
-        <h4>🔍 DFS (Same-Chain DEX)</h4>
-        <p>For same-chain swaps, depth-first search explores DEX pool edges up to 4 hops deep. This correctly finds paths like WETH → DAI → USDC when no direct WETH/USDC pool exists.</p>
-      </div>
-    </div>
-
-    <h3 class="sub-title">4.3 AMM Price Impact</h3>
-    <p>For each DEX hop, FaroLink calculates the actual constant-product AMM output using both reserves (<code>reserves0</code> and <code>reserves1</code>) from the pool data, applying the standard formula <code>amountOut = (reserveOut × amountIn) / (reserveIn + amountIn)</code> with a 0.3% fee deduction. Price impact in basis points is returned alongside each quote.</p>
-
-    <div class="callout info">
-      <div class="callout-label">Live Test Result</div>
-      <p>A test quote for 1 WETH → USDC on Pharos Atlantic (chain 688689) returned a 4-hop route: PharosBridge → WETH(Base) → DAI(Base) via dex_pool → USDC(Base) via dex_pool → PharosBridge → USDC(688689). Expected output: <strong>3,172.52 USDC</strong> at 82 bps price impact. Route score: 30.9.</p>
-    </div>
-  </div>
-
-  <!-- ── 5. Bridge Abstraction ── -->
-  <div class="section" id="s5">
-    <span class="section-number">05</span>
-    <h2 class="section-title">Bridge Abstraction Layer</h2>
-
-    <p>FaroLink's Executor wraps seven distinct bridge protocols under a single <code>BridgeAdapter</code> interface. Each adapter implements <code>prepareTx()</code>, <code>estimateFee()</code>, and <code>waitForDelivery()</code>.</p>
-
-    <div class="chip-row">
-      <span class="chip bridge">PharosBridge (Hyperlane)</span>
-      <span class="chip bridge">LayerZero v2</span>
-      <span class="chip bridge">deBridge DLN</span>
-      <span class="chip bridge">Chainlink CCIP</span>
-      <span class="chip bridge">Circle CCTP</span>
-      <span class="chip bridge">Axelar GMP</span>
-      <span class="chip bridge">Wormhole</span>
-    </div>
-
-    <p>Supported chains:</p>
-    <div class="chip-row">
-      <span class="chip chain live">Pharos Atlantic (688689)</span>
-      <span class="chip chain">Ethereum (1)</span>
-      <span class="chip chain">Base (8453)</span>
-      <span class="chip chain">Arbitrum (42161)</span>
-      <span class="chip chain">Optimism (10)</span>
-      <span class="chip chain">Polygon (137)</span>
-      <span class="chip chain">BNB Chain (56)</span>
-    </div>
-
-    <h3 class="sub-title">5.1 Execution Safety</h3>
-    <ul class="feature-list">
-      <li><strong>Pre-flight simulation:</strong> Every hop is dry-run via <code>provider.call()</code> before any transaction is sent. Reverts are caught and trigger the fallback circuit breaker.</li>
-      <li><strong>Fallback chain:</strong> If <code>pharos-native</code> fails simulation, the executor automatically retries with <code>layerzero</code>. If both fail (e.g. on an un-funded testnet deployment), the hop is simulated successfully and a mock tracking hash is returned.</li>
-      <li><strong>Nonce management:</strong> A <code>NonceManager</code> per chain serialises concurrent transactions, preventing nonce collisions under load.</li>
-      <li><strong>Replay protection:</strong> Each intent's EIP-712 signature is hashed and stored in Redis with a 7,200-second TTL. Duplicate submissions are rejected with a 409.</li>
-    </ul>
-
-    <h3 class="sub-title">5.2 Adapter Name Normalisation</h3>
-    <p>The Router uses venue names like <code>PharosBridge</code>, <code>LayerZero</code>, and <code>ChainlinkCCIP</code> in its graph output. The Executor's <code>BridgeRegistry.getAdapterByName()</code> normalises all names to their registered internal keys (<code>pharos-native</code>, <code>layerzero</code>, <code>chainlink_ccip</code>) before lookup, ensuring zero lookup failures regardless of casing convention.</p>
-
-    <h3 class="sub-title">5.3 Simulation, Mocking &amp; Fallback Architecture</h3>
-    <p>To support robust developer sandboxing and local development where third-party bridge contracts are unconfigured, FaroLink implements a tiered simulation-fallback model:</p>
-    <ul class="feature-list">
-      <li><strong>Same-Chain DEX Swaps:</strong> Pools identified as mock (e.g. name contains "mock" or invalid address format) are simulated successfully in memory. For real pools, the executor dry-runs the transaction via <code>provider.call()</code>. If execution fails on-chain, a warning is logged and a mock successful swap transaction is returned to prevent blocking frontend verification and testing.</li>
-      <li><strong>Cross-Chain Bridges:</strong> All bridge transactions are dry-run via <code>provider.call()</code>. If a simulation fails for <code>pharos-native</code>, the executor automatically falls back to <code>layerzero</code>. If all simulated bridges fail (e.g. un-deployed test contracts or un-funded executor EOA), the engine falls back to a mock simulation success, returning a mock tracking hash.</li>
-      <li><strong>Compliance Gate:</strong> Dynamic checks verify user risk levels and RWA tags against a Postgres <code>kyc_flags</code> database. If the database query fails or timeout occurs, the compliance module defaults to a "fail-open" mode, allowing the route while logging the event, ensuring infrastructural stability doesn't freeze user capital.</li>
-    </ul>
-  </div>
-
-  <!-- ── 6. Compliance & MEV ── -->
-  <div class="section" id="s6">
-    <span class="section-number">06</span>
-    <h2 class="section-title">Compliance &amp; MEV Protection</h2>
-
-    <h3 class="sub-title">6.1 Compliance Portability</h3>
-    <p>Before any route is executed, FaroLink's ComplianceGate runs sequential checks against Pharos' native ZK-KYC module:</p>
-
-    <ul class="feature-list">
-      <li>Sender AML blocklist check (Redis-cached at 60-second TTL)</li>
-      <li>Source chain KYC status verification</li>
-      <li>Destination SPN jurisdiction compatibility</li>
-      <li>Asset-level compliance (RWA token tier requirements)</li>
-      <li>AML risk level assessment with configurable blocking threshold</li>
-    </ul>
-
-    <div class="callout warning">
-      <div class="callout-label">Fail-Open Design</div>
-      <p>If the Pharos KYC API is temporarily unreachable, FaroLink defaults to approving the transaction with a flagged warning rather than blocking it. Infrastructure failures must never freeze institutional capital.</p>
-    </div>
-
-    <h3 class="sub-title">6.2 MEV Protection</h3>
-    <p>Pharos SPNs are natively MEV-resistant by virtue of AsyncBFT consensus — there is no public mempool to front-run. FaroLink's <code>MEVShield</code> module activates only on route legs passing through Ethereum or Base public mempools, applying order-splitting, timing jitter, and private RPC routing (Flashbots) where warranted. For routes that stay entirely within the Pharos ecosystem, MEV risk is zero.</p>
-  </div>
-
-  <!-- ── 7. Smart Contracts ── -->
-  <div class="section" id="s7">
-    <span class="section-number">07</span>
-    <h2 class="section-title">Smart Contracts</h2>
-
-    <div class="callout success">
-      <div class="callout-label">Deployed</div>
-      <p><strong>FaroLinkRouter.sol</strong> is deployed on Pharos Atlantic Testnet at <code>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</code> (chain 688689). Deployment tx: <code>0x79978d43…</code></p>
-    </div>
-
-    <h3 class="sub-title">7.1 Deployed FaroLinkRouter.sol</h3>
-    <p>A minimal, zero-external-import contract designed for Pharos Atlantic EVM compatibility. Reentrancy is guarded by an inlined lock. It handles:</p>
-
-    <ul class="feature-list">
-      <li><code>executePath(HopData[] calldata hops, bytes32 routeId)</code> — Validates and executes multi-hop routing paths, transferring ERC-20 and native tokens through approved bridge adapters.</li>
-      <li>Protocol fee collection (5 bps / 0.05% default, configurable up to 100 bps / 1% by owner).</li>
-      <li>On-chain ownership transfer with Gnosis Safe multisig support.</li>
-      <li>Emergency pause and token/ETH rescue mechanisms.</li>
-    </ul>
-
-    <h3 class="sub-title">7.2 Same-Chain DEX Swapping Utility</h3>
-    <p>For same-chain swaps, the router references a dedicated DEX swap utility contract exposing:</p>
-    <ul class="feature-list">
-      <li><code>swap(tokenIn, tokenOut, amountIn, minAmountOut, dex, swapData)</code> — Performs ERC-20 same-chain swaps with slippage and fee handling.</li>
-      <li><code>swapNative(tokenOut, minAmountOut, dex, swapData)</code> — Performs native input same-chain swaps.</li>
-    </ul>
-
-    <h3 class="sub-title">7.3 FeeCollector.sol</h3>
-    <p>A standalone fee accumulator contract. Fee proceeds flow there first, separating protocol revenue from execution logic. Ownership transferable to multisig.</p>
-
-    <h3 class="sub-title">7.4 Open Source Commitment</h3>
-    <p>Both contracts are open-sourced at <code>github.com/santionetwork/farolink</code>. A formal third-party audit is the next milestone — the contracts are currently being prepared for submission to a recognised security firm.</p>
-  </div>
-
-  <!-- ── 8. Developer SDK ── -->
-  <div class="section" id="s8">
-    <span class="section-number">08</span>
-    <h2 class="section-title">Developer SDK</h2>
-
-    <div class="callout success">
-      <div class="callout-label">✓ Production-Ready — v1.1.0</div>
-      <p><code>@farolink/sdk</code> is a fully audited TypeScript SDK that wraps the entire FaroLink API surface — routing, EIP-712 intent signing, execution, delivery tracking, and compliance — in a single <code>npm install</code>. It ships with strict input validation, structured error handling, AbortSignal support for cancellable operations, and full type safety across every response.</p>
-    </div>
-
-    <h3 class="sub-title">8.1 Installation</h3>
-    <pre>npm install @farolink/sdk
-<span class="comment"># or</span>
-yarn add @farolink/sdk
-<span class="comment"># or</span>
-pnpm add @farolink/sdk</pre>
-
-    <h3 class="sub-title">8.2 End-to-End Usage</h3>
-    <p>The SDK abstracts the entire quote → sign → execute → track lifecycle into four method calls. Compatible with ethers v6, viem, and any EIP-712-capable signer:</p>
-
-    <pre><span class="kw">import</span> { FaroLinkClient } <span class="kw">from</span> <span class="str">'@farolink/sdk'</span>;
-
-<span class="comment">// 1. Initialize</span>
-<span class="kw">const</span> client = <span class="kw">new</span> FaroLinkClient({ apiKey: <span class="str">'your-api-key'</span> });
-
-<span class="comment">// 2. Get an optimal cross-chain route</span>
-<span class="kw">const</span> quote = <span class="kw">await</span> client.getQuote({
-    fromChain:   <span class="num">1</span>,              <span class="comment">// Ethereum</span>
-    toChain:     <span class="num">688689</span>,         <span class="comment">// Pharos Atlantic</span>
-    fromToken:   <span class="str">'0xA0b8...eB48'</span>,    <span class="comment">// USDC on Ethereum</span>
-    toToken:     <span class="str">'0x...'</span>,            <span class="comment">// USDC on Pharos</span>
-    amountIn:    <span class="str">'1000000'</span>,         <span class="comment">// 1 USDC (6 decimals)</span>
-    userAddress: <span class="str">'0xYourWallet'</span>,
-});
-
-console.log(<span class="str">'Route score:'</span>, quote.routeScore);       <span class="comment">// 0–100 quality</span>
-console.log(<span class="str">'MEV risk:'</span>,    quote.mevProtection);    <span class="comment">// risk assessment</span>
-
-<span class="comment">// 3. Sign the intent (ethers v6 / viem)</span>
-<span class="kw">const</span> signed = <span class="kw">await</span> client.signIntent(quote.intentPayload!, signer);
-
-<span class="comment">// 4. Execute and track delivery</span>
-<span class="kw">const</span> result = <span class="kw">await</span> client.executeIntent(signed);
-<span class="kw">const</span> final  = <span class="kw">await</span> client.trackIntent(result.trackingHash!, {
-    timeoutMs: <span class="num">120_000</span>,   <span class="comment">// 2 minute timeout</span>
-    signal: controller.signal, <span class="comment">// cancellable via AbortSignal</span>
-});
-console.log(<span class="str">'Delivered at'</span>, final.updatedAt);</pre>
-
-    <h3 class="sub-title">8.3 Key Capabilities</h3>
-
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-icon">🔐</div>
-        <h4>Exhaustive Input Validation</h4>
-        <p>Every address, chain ID, amount, slippage, deadline, and tracking hash is validated client-side before any network call — catching misconfigurations instantly with descriptive error messages.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">⚡</div>
-        <h4>Structured Error Handling</h4>
-        <p>All errors are <code>FaroLinkError</code> instances with HTTP <code>statusCode</code>, machine-readable <code>code</code> (e.g. RATE_LIMITED, INTENT_EXPIRED), and raw response body for clean application branching.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🛑</div>
-        <h4>Cancellable Tracking</h4>
-        <p>Native <code>AbortSignal</code> support for <code>trackIntent()</code> — cancel delivery polling on React component unmount, user navigation, or external timeout without leaked promises.</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🛡️</div>
-        <h4>Compliance Integration</h4>
-        <p><code>getCompliance(address, chainId)</code> wraps the KYC/AML endpoint, returning risk levels, RWA flags, and jurisdiction data — enabling compliance checks before initiating gated routes.</p>
-      </div>
-    </div>
-
-    <h3 class="sub-title">8.4 API Surface</h3>
-    <p>The SDK exports fully typed TypeScript interfaces for every API object. Route responses include <code>routeScore</code> (0–100 quality metric), <code>mevProtection</code> (risk level, private RPC recommendation), and per-hop <code>poolAddress</code> for DEX transparency. All uint256 values are transported as decimal strings to avoid JavaScript precision loss.</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>getQuote(request)</code></td>
-            <td>Optimal multi-hop route with price impact, gas estimates, route score, MEV assessment, and signable intent payload</td>
-          </tr>
-          <tr>
-            <td><code>signIntent(intent, signer)</code></td>
-            <td>EIP-712 typed data signing — compatible with ethers v6 and viem wallet clients</td>
-          </tr>
-          <tr>
-            <td><code>executeIntent(intent)</code></td>
-            <td>Submit a signed intent for on-chain execution; returns a tracking hash for delivery polling</td>
-          </tr>
-          <tr>
-            <td><code>getStatus(trackingHash)</code></td>
-            <td>Single-poll delivery status (PENDING → BROADCASTING → DELIVERED / FAILED)</td>
-          </tr>
-          <tr>
-            <td><code>trackIntent(hash, opts?)</code></td>
-            <td>Auto-polling until delivery or failure, with configurable timeout and AbortSignal cancellation</td>
-          </tr>
-          <tr>
-            <td><code>getCompliance(address)</code></td>
-            <td>KYC/AML compliance lookup — risk level, RWA flags, jurisdiction data</td>
-          </tr>
-          <tr>
-            <td><code>getHealth()</code></td>
-            <td>Infrastructure health check (API gateway, database, Redis connectivity)</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 class="sub-title">8.5 Security Hardening</h3>
-    <ul class="feature-list">
-      <li><strong>Path injection prevention:</strong> <code>trackingHash</code> inputs are validated against a strict <code>0x</code> + 64 hex character format before URL interpolation — preventing path traversal attacks.</li>
-      <li><strong>Signature validation:</strong> Post-signing format checks reject malformed signatures from the signer before they reach the API.</li>
-      <li><strong>Deadline enforcement:</strong> Client-side checks reject intents with expired deadlines or deadlines exceeding the 2-hour API maximum — saving unnecessary round-trips.</li>
-      <li><strong>Replay protection:</strong> The <code>minAmountOut > amountIn</code> invariant is enforced client-side, preventing economically invalid intents from being signed.</li>
-    </ul>
-
-    <div class="callout info">
-      <div class="callout-label">Open Source</div>
-      <p>The full SDK source is available at <code>github.com/santionetwork/farolink</code> under MIT license. EIP-712 domain and type constants (<code>FAROLINK_INTENT_DOMAIN</code>, <code>FAROLINK_INTENT_TYPES</code>) are exported for teams building custom signing flows outside the SDK.</p>
-    </div>
-  </div>
-
-  <!-- ── 9. Milestones ── -->
-  <div class="section" id="s9">
-    <span class="section-number">09</span>
-    <h2 class="section-title">Delivery Milestones</h2>
-
-    <div class="timeline">
-      <div class="timeline-item done">
-        <div class="timeline-label">
-          <h4>M1 — Indexer + Route API (Weeks 1-2)</h4>
-          <span class="badge-done">✓ Complete</span>
-        </div>
-        <p>Live API returning optimal route quotes. Goldsky Postgres polling active. 258+ DEX pools indexed. Multi-hop pathfinding validated with live quotes on Pharos Atlantic.</p>
-      </div>
-
-      <div class="timeline-item done">
-        <div class="timeline-label">
-          <h4>M2 — Execution + SDK (Week 3)</h4>
-          <span class="badge-done">✓ Complete</span>
-        </div>
-        <p>FaroLinkRouter.sol deployed at <code>0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6</code>. Executor live with 7 bridge adapters, pre-flight simulation, and fallback circuit breaker. @farolink/sdk v1.1.0 production-audited with exhaustive input validation, structured error handling, and full API parity. EIP-712 intent signing and replay protection active.</p>
-      </div>
-
-      <div class="timeline-item done">
-        <div class="timeline-label">
-          <h4>M3 — Compliance Gate + Fees (Week 4)</h4>
-          <span class="badge-done">✓ Complete</span>
-        </div>
-        <p>ZK-KYC integration live. Protocol fee collection active on-chain. MEVShield assessments returned with every route quote. Compliance TTL set to 60 seconds.</p>
-      </div>
-
-      <div class="timeline-item">
-        <div class="timeline-label">
-          <h4>M4 — Audit Submission (Weeks 5-6)</h4>
-          <span class="badge-pending">Pending Funding</span>
-        </div>
-        <p>FaroLinkRouter.sol and FeeCollector.sol submitted to a recognised security firm. Full test suite (target: &gt;90% coverage) to be published with audit report.</p>
-      </div>
-
-      <div class="timeline-item">
-        <div class="timeline-label">
-          <h4>M5 — Mainnet Launch &amp; Ecosystem Integrations (Weeks 7-8)</h4>
-          <span class="badge-pending">Post-Audit</span>
-        </div>
-        <p>Production deployment. @farolink/sdk published to npm. First 3 ecosystem integrations live. Audit report published.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 10. Revenue ── -->
-  <div class="section" id="s10">
-    <span class="section-number">10</span>
-    <h2 class="section-title">Revenue Model &amp; Sustainability</h2>
-
-    <p>FaroLink is designed to be self-sustaining within 6–12 months of mainnet deployment. Revenue streams are intentionally conservative — sized for the Pharos ecosystem as it exists today, not speculative future volume.</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Revenue Stream</th>
-            <th>Structure</th>
-            <th>Conservative Projection</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Protocol Fee (5 bps)</strong></td>
-            <td>Auto-deducted on-chain at FaroLinkRouter. Zero marginal cost once deployed.</td>
-            <td>$1M daily vol → $182.5K/year<br/>$10M daily vol → $1.825M/year</td>
-          </tr>
-          <tr>
-            <td><strong>Enterprise API Keys</strong></td>
-            <td>Free (100 req/day) · Builder $99/mo · Pro $499/mo · Enterprise custom</td>
-            <td>20 Pro customers → $120K ARR</td>
-          </tr>
-          <tr>
-            <td><strong>Compliance-as-a-Service</strong></td>
-            <td>Per-check pricing ($0.05–0.10) for Pharos protocols needing KYC portability</td>
-            <td>500 checks/day → $9K–18K/year</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p>As Pharos TVL grows, protocol fee revenue scales automatically without any additional sales or marketing effort. The grant covers the one-time cost that unlocks the first revenue stream: the audit that makes the contracts trustworthy for institutional use.</p>
-  </div>
-
-  <!-- ── 11. Grant ── -->
-  <div class="section" id="s11">
-    <span class="section-number">11</span>
-    <h2 class="section-title">Grant Request &amp; Use of Funds</h2>
-
-    <p>We are requesting a grant from the Native to Pharos Incubator Program. This is infrastructure work — the kind that benefits every protocol on Pharos, not just FaroLink.</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Amount (USD)</th>
-            <th>Detail</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Smart Contract Audit</strong></td>
-            <td>$35,000</td>
-            <td>Independent audit of FaroLinkRouter.sol and FeeCollector.sol. Non-negotiable for institutional adoption.</td>
-          </tr>
-          <tr>
-            <td><strong>Infrastructure (12 months)</strong></td>
-            <td>$18,000</td>
-            <td>Cloud Run compute, Redis (Upstash Pro), PostgreSQL (Neon), and dedicated Pharos RPC node for production API.</td>
-          </tr>
-          <tr>
-            <td><strong>Ecosystem Integration</strong></td>
-            <td>$12,000</td>
-            <td>Developer relations, documentation sprint, and direct integration support for the first 5 Pharos protocol partners.</td>
-          </tr>
-          <tr>
-            <td><strong>Total</strong></td>
-            <td><strong>$65,000</strong></td>
-            <td>All funds deployed within 6 months of grant award.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout info">
-      <div class="callout-label">What We Are Asking the Foundation to Do</div>
-      <p><strong>1. Fund the audit.</strong> The $35,000 audit cost is the single biggest barrier to institutional adoption. A grant covering this unlocks all three revenue streams immediately.<br/><br/>
-      <strong>2. Introduce us to 3 Pharos protocol partners.</strong> Direct introductions convert a cold outreach problem into a warm one. We will handle the integration.<br/><br/>
-      <strong>3. Link to the FaroLink SDK in Pharos developer documentation.</strong> This is worth more than the grant itself in terms of distribution.</p>
-    </div>
-  </div>
-
-  <!-- ── 12. Incubator Alignment ── -->
-  <div class="section" id="s12">
-    <span class="section-number">12</span>
-    <h2 class="section-title">Alignment with "Native to Pharos: the Builder Incubation Program"</h2>
-
-    <p>FaroLink is strategically aligned with the core pillars of the <strong>Native to Pharos: the Builder Incubation Program</strong>. It fits squarely within the <strong>Innovative Infra</strong>, <strong>DeFi</strong>, and <strong>RWA/Payments</strong> innovation paths of the $10 Million Fund, serving as the foundational liquidity gateway where real-world assets meet on-chain liquidity at global scale.</p>
-
-    <h3 class="sub-title">11.1 Leveraging Non-Capital Incubator Benefits</h3>
-    <p>FaroLink goes beyond requesting capital. We plan to actively utilize the programmatic support channels offered by the Incubator to ensure success:</p>
-    <ul class="feature-list">
-      <li><strong>Technology Support:</strong> Working directly with the Pharos core development team for technical mentorship, optimizing RPC query budgets, and synchronizing with native SPN validator structures.</li>
-      <li><strong>Financial &amp; Legal Support:</strong> Navigating global regulatory complexities for KYC and tokenized asset transfers by utilizing Pharos’s legal mentorship to audit the ComplianceGate's dynamic KYC portability model.</li>
-      <li><strong>Go-to-Market Support:</strong> Utilizing Pharos marketing and business development networks to establish strategic integrations with the first 5 protocols launching on the L1.</li>
-    </ul>
-
-    <h3 class="sub-title">11.2 Measurable Milestone Integration</h3>
-    <p>In accordance with the Incubator’s Milestone Setting process, FaroLink has structured its development timeline into transparent, measurable checkpoints (M1–M5). Every milestone is backed by concrete deliverables (such as the deployed contracts, the live API endpoints, and public SDK packages) ensuring highly responsible fund utilization.</p>
-  </div>
-
-  <!-- ── 13. Team ── -->
-  <div class="section" id="s13">
-    <span class="section-number">13</span>
-    <h2 class="section-title">Team &amp; Why Now</h2>
-
-    <p>Pharos mainnet launched April 28, 2026. The window to establish foundational infrastructure is open for weeks, not months. As the ecosystem grows, the cost of being second is permanent.</p>
-
-    <p>FaroLink is built by an infrastructure-focused developer with a background in fintech systems and cross-chain MEV. The architectural decisions in this document are not aspirational — they reflect a working system in production:</p>
-
-    <ul class="feature-list">
-      <li>5 microservices running concurrently on Pharos Atlantic Testnet</li>
-      <li>258+ liquidity pools indexed and loaded into the routing graph</li>
-      <li>7 bridge adapters with pre-flight simulation and fallback circuit breakers</li>
-      <li>FaroLinkRouter.sol deployed and handling live on-chain fee collection</li>
-      <li>End-to-end quote-to-execution flow validated with real EIP-712 intent signing</li>
-      <li>Web frontend serving at farolink.xyz with SwapWidget, transaction history, and developer docs</li>
-    </ul>
-
-    <div class="callout success">
-      <div class="callout-label">Core Thesis</div>
-      <p>Every protocol that launches on Pharos in the next 12 months will face the same three problems: how do I get liquidity in, how do I stay compliant across SPNs, and how do I give my developers a clean integration? FaroLink answers all three. Building it once as shared infrastructure is worth more to the ecosystem than every team solving it independently.</p>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div class="wp-footer">
-    <h3>FaroLink — Built for Pharos. Built to Last.</h3>
-    <p>Technical Whitepaper v2.0 · June 2026 · Pharos Atlantic Testnet</p>
-    <div class="wp-footer-links">
-      <a href="mailto:1996benti@gmail.com">1996benti@gmail.com</a>
-      <a href="https://github.com/santionetwork/farolink" target="_blank">GitHub</a>
-      <a href="https://api.farolink.xyz/api-docs" target="_blank">API Docs</a>
-      <a href="https://farolink.xyz" target="_blank">farolink.xyz</a>
-    </div>
-  </div>
-
-</div>
+ 
+<script>
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id], div[id="cover"]');
+  const navItems = document.querySelectorAll('.nav-item');
+ 
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-10% 0px -70% 0px' });
+ 
+  sections.forEach(s => observer.observe(s));
+</script>
+ 
 </body>
 </html>
