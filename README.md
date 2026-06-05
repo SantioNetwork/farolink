@@ -54,7 +54,7 @@ User Wallet
 └──────────────────────┬──────────────────────────────┘
                        │ reserves feed
 ┌──────────────────────▼──────────────────────────────┐
-│  farolink-indexer  (:3003)                          │
+│  farolink-indexer  (background worker)              │
 │  Goldsky → Neon DB → Redis pipeline                 │
 │  28,810+ processed Pharos Atlantic log rows         │
 │  4 active pipelines: farolink, kyc, liquidity, spn  │
