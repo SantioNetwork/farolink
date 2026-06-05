@@ -40,7 +40,7 @@ export default function App() {
                 {/* Wallet & Grant Link — Fix B1 */}
                 <div className="navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <a
-                        href="/whitepaper.html"
+                        href="/whitepaper"
                         target="_blank"
                         style={{ color: 'var(--accent)', fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
