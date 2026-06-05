@@ -1,7 +1,7 @@
 # FaroLink 🌊
 ### Cross-Chain Liquidity Infrastructure for the Pharos RealFi Ecosystem
 
-> **Built by [Stephen Benti](https://github.com/stephenbenti) — Pharos Incubator Applicant, May 2026**  
+> **Built by [Stephen Benti](https://github.com/stephenbenti) — Pharos Incubator Applicant, June 2026**  
 > Solo founder. Full-stack blockchain engineer.
 
 ---
@@ -36,40 +36,45 @@ FaroLink solves this by:
 
 ---
 
-## Architecture — 4 Layers
+## Architecture — 4 Backend Services + Frontend
 
 ```
 User Wallet
     │ EIP-712 intent signature
     ▼
 ┌─────────────────────────────────────────────────────┐
-│  Layer 4 — farolink-api  (:4000)                  │
-│  Rate-limited REST gateway · Swagger docs · Zod      │
+│  farolink-api  (:4000)                              │
+│  Rate-limited REST gateway · Swagger docs · Zod     │
 └──────────────────────┬──────────────────────────────┘
                        │ /route
 ┌──────────────────────▼──────────────────────────────┐
-│  Layer 2 — farolink-router  (:3001)               │
+│  farolink-router  (:3001)                           │
 │  Dijkstra pathfinder · x*y=k AMM math               │
 │  109 pool pairs across 7 chains in Upstash Redis    │
 └──────────────────────┬──────────────────────────────┘
                        │ reserves feed
 ┌──────────────────────▼──────────────────────────────┐
-│  Layer 1 — farolink-indexer  (:3001)              │
+│  farolink-indexer  (:3003)                          │
 │  Goldsky → Neon DB → Redis pipeline                 │
 │  28,810+ processed Pharos Atlantic log rows         │
+│  4 active pipelines: farolink, kyc, liquidity, spn  │
 └─────────────────────────────────────────────────────┘
                        │ execute
 ┌─────────────────────────────────────────────────────┐
-│  Layer 3 — farolink-executor  (:3002)             │
-│  ERC-4337 UserOp bundler · Bridge adapters          │
-│  [Testnet Note: executor targets local Hardhat RPC  │
-│   pending bytecode size fix on Pharos Atlantic]     │
+│  farolink-executor  (:3002)                         │
+│  ERC-4337 UserOp bundler · 7 bridge adapters        │
+│  EIP-712 intent verification · fee collection       │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│  farolink-web  (Vite / React)                       │
+│  Deployed on Vercel · farolink.xyz                  │
 └─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Current Testnet Status (Pharos Atlantic — May 2026)
+## Current Status (Pharos Atlantic — June 2026)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
@@ -78,16 +83,32 @@ User Wallet
 | Pharos DEX pools | ✅ Real on-chain | 67 pools discovered via RPC |
 | Other chain pools | ⚠️ Simulated | Market-rate reserves (ETH=$3200 etc.) |
 | Router pathfinding | ✅ Live | 15/15 quote pairs passing |
-| Executor on-chain | 🔄 Hardhat | Pending Pharos Atlantic bytecode size fix |
-| Frontend UI | ✅ Live | Vercel deploy |
-| SDK | ✅ Published | `npm i @farolink/sdk` |
+| FaroLinkRouter contract | ✅ Deployed | Pharos Atlantic (`0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6`) |
+| FeeCollector contract | 🔄 Hardhat | Deployed on local Hardhat — awaiting Pharos Atlantic deployment |
+| Frontend UI | ✅ Live | Vercel — [farolink.xyz](https://farolink.xyz) |
+| SDK | ✅ Published | `npm i @farolink/sdk@1.1.0` |
+
+---
+
+## Smart Contracts
+
+| Contract | Status | Address |
+|----------|--------|---------|
+| `FaroLinkRouter.sol` | ✅ Pharos Atlantic (688689) | `0xD499C6681e5496e69434C97e9B52C61Da62d4Fd6` |
+| `FeeCollector.sol` | 🔄 Hardhat only | Pending Atlantic deployment |
+| `FeeCollectorMini.sol` | 🔄 Development | — |
+| `FaroLinkRegistry.sol` | 🔄 Development | — |
+
+**Deployment tx (Router):** `0x79978d436b5e767fcdb2a8624a1080d0102412058be9e8baa19092fd0dc885a9`  
+**Deployer:** `0x40AeE49D353470C0D696d1ae05ABf4Bdbb933609`  
+All contracts are open-source at [github.com/SantioNetwork/farolink](https://github.com/SantioNetwork/farolink).
 
 ---
 
 ## Supported Chains
 
 | Chain | DEX Pools | Real Data? |
-|-------|-----------|-----------|
+|-------|-----------|-----------| 
 | **Pharos Atlantic (688689)** | 67 | ✅ Real on-chain |
 | Ethereum (1) | 9 | Demo reserves |
 | Arbitrum (42161) | 7 | Demo reserves |
@@ -128,6 +149,10 @@ User Wallet
 ---
 
 ## SDK Quick Start
+
+```bash
+npm install @farolink/sdk
+```
 
 ```typescript
 import { FaroLinkClient } from '@farolink/sdk';
@@ -198,6 +223,12 @@ cd farolink-core/farolink-api && npm i && npm start
 cd farolink-public/farolink-web && npm i && npm run dev
 ```
 
+### Run with Docker Compose
+```bash
+cp .env.example .env   # fill in your credentials
+docker-compose up
+```
+
 ---
 
 ## Deployment
@@ -207,20 +238,17 @@ FaroLink is deployed as a split architecture: **Vercel** for the frontend, **Rai
 ### Frontend → Vercel
 
 ```bash
-# From the repository root on GitHub (santionetwork/farolink)
-# Vercel auto-detects the Vite framework
-
-# 1. Import project in Vercel dashboard
-#    → Root Directory: farolink-public/farolink-web
-#    → Framework: Vite
-
-# 2. Set environment variable:
-#    VITE_API_URL = https://farolink-api-production.up.railway.app
+# Import project in Vercel dashboard
+#   → Root Directory: farolink-public/farolink-web
+#   → Framework: Vite
+#
+# Set environment variable:
+#   VITE_API_URL = https://farolink-api-production.up.railway.app
 ```
 
 ### Backend → Railway
 
-Each service is deployed as a separate Railway service in a single project, all linked via private networking:
+Each service is deployed as a separate Railway service in a single project, linked via private networking:
 
 ```bash
 # In Railway dashboard, create a new project, then add 4 services:
@@ -240,8 +268,6 @@ Each service is deployed as a separate Railway service in a single project, all 
 # Service 4: Indexer
 #   → Root Directory: farolink-core/farolink-indexer
 #   → Public networking: OFF (internal only)
-
-# Add managed plugins: PostgreSQL + Redis
 ```
 
 ### Railway Environment Variables
@@ -256,7 +282,7 @@ Each service is deployed as a separate Railway service in a single project, all 
 | `ADMIN_KEY_HASH` | API | SHA-256 of your master admin key |
 | `EXECUTOR_PRIVATE_KEY` | Executor | Hot wallet private key |
 | `RPC_URL` | Executor | `https://testnet.dplabs-internal.com` |
-| `PORT` | API: `4000`, Router: `3001`, Executor: `3002`, Indexer: `3001` |
+| `PORT` | API: `4000`, Router: `3001`, Executor: `3002`, Indexer: `3003` |
 | `NODE_ENV` | All | `production` |
 | `ALLOWED_ORIGINS` | API | `https://farolink.xyz,https://app.farolink.xyz` |
 
@@ -266,9 +292,9 @@ Each service is deployed as a separate Railway service in a single project, all 
 
 | Milestone | Timeline | Deliverable |
 |-----------|----------|-------------|
-| **M1** | Month 1 | Executor deployed on Pharos mainnet — first real on-chain swap executed |
+| **M1** | Month 1 | FeeCollector + Router deployed on Pharos mainnet — first real on-chain swap executed |
 | **M2** | Month 2 | Live DEX pool discovery for ETH/ARB/Base via Uniswap factory RPCs |
-| **M3** | Month 3 | SDK published to npm, 3 third-party DApp integrations |
+| **M3** | Month 3 | SDK v2.0 published to npm, 3 third-party DApp integrations |
 | **M4** | Month 4 | $1M cumulative volume routed through FaroLink |
 
 ---
