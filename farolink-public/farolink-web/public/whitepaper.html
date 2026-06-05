@@ -55,8 +55,6 @@
 
   /* ── LAYOUT ── */
   .layout {
-    display: grid;
-    grid-template-columns: 260px 1fr;
     min-height: 100vh;
   }
 
@@ -687,7 +685,6 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
     .sidebar { display: none; }
     .main-content { margin-left: 0; padding: 24px 24px 60px; }
     .cover-stats { grid-template-columns: repeat(2,1fr); }
@@ -715,7 +712,7 @@
       </div>
       <div class="meta-item">
         <span class="meta-label">Status</span>
-        <span class="meta-value live"><span class="live-dot"></span>Production</span>
+        <span class="meta-value live"><span class="live-dot"></span>Testnet</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Chain ID</span>
