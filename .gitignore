@@ -31,3 +31,7 @@ contracts/typechain-types/
 
 # OS
 desktop.ini
+
+# Local test results / dev artifacts
+PODMAN_TEST_RESULTS.md
+*.test_results.md
