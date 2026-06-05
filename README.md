@@ -19,7 +19,7 @@ When a user wants to move USDM from Ethereum to Pharos, or swap S-UST for WPHRS 
 | Interface | URL |
 |-----------|-----|
 | 🖥️ Swap UI | **[farolink.xyz](https://farolink.xyz)** |
-| 📖 API Docs | `http://localhost:4000/api-docs` (local) |
+| 📖 API Docs | **[farolink.xyz/api-docs](https://api.farolink.xyz/api-docs)** |
 | 🔗 Pharos Atlantic Testnet | [atlantic.pharosscan.xyz](https://atlantic.pharosscan.xyz) |
 
 ---
