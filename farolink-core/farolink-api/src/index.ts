@@ -339,6 +339,48 @@ app.post('/v1/execute', async (req, res) => {
         // Mark intent as used in Redis with TTL matching the max deadline window (2 hours)
         await redis.setex(`intent:used:${intentHash}`, 7200, '1');
 
+        // Record the event in Redis and Postgres to prevent 404 in status API
+        const trackingHash = execResponse.data.trackingHash ?? execResponse.data.intentHash ?? '';
+        if (trackingHash) {
+            try {
+                const statusData = {
+                    trackingHash:       trackingHash,
+                    sourceChainId:      intent.sourceChainId,
+                    destinationChainId: intent.targetChainId,
+                    bridgeVenue:        execResponse.data.adapter ?? 'pending',
+                    status:             execResponse.data.status ?? 'pending',
+                    amount:             intent.amountIn,
+                    feeCollected:       0,
+                    errorMessage:       null,
+                    createdAt:          new Date().toISOString(),
+                    updatedAt:          new Date().toISOString(),
+                };
+                await redis.setex(`bridge:status:${trackingHash}`, 30, JSON.stringify(statusData));
+
+                await db.pool.query(
+                    `INSERT INTO bridge_events (
+                        tracking_hash, source_chain_id, destination_chain_id,
+                        bridge_venue, status, amount, fee_collected
+                     ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                     ON CONFLICT (tracking_hash) DO UPDATE SET
+                        status = EXCLUDED.status,
+                        bridge_venue = EXCLUDED.bridge_venue,
+                        updated_at = CURRENT_TIMESTAMP`,
+                    [
+                        trackingHash,
+                        intent.sourceChainId,
+                        intent.targetChainId,
+                        execResponse.data.adapter ?? 'pending',
+                        execResponse.data.status ?? 'pending',
+                        intent.amountIn,
+                        0
+                    ]
+                );
+            } catch (dbErr: any) {
+                logger.warn('Failed to record initial bridge event', { error: dbErr.message });
+            }
+        }
+
         executeRequestsTotal.inc({ status: 'success' });
 
         // Fire webhook notifications asynchronously (don't block the response)
