@@ -25,7 +25,7 @@ const envSchema = z.object({
   WORMHOLE_BRIDGE_ADDRESS:    z.string().optional(),
   DEBRIDGE_DLN_ADDRESS:       z.string().optional(),
   PHAROS_BRIDGE_ADDRESS:      z.string().optional(),
-  PHAROS_FLOW_ROUTER_ADDRESS: z.string().optional(),
+  FAROLINK_ROUTER_ADDRESS:    z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

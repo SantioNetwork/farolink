@@ -63,9 +63,9 @@ export class BridgeAbstractor {
         let venue = hop.venue;
 
         if ((venue as string) === "dex_pool") {
-            const routerAddress = env.PHAROS_FLOW_ROUTER_ADDRESS;
+            const routerAddress = env.FAROLINK_ROUTER_ADDRESS;
             if (!routerAddress) {
-                throw new Error("PHAROS_FLOW_ROUTER_ADDRESS not configured in environment");
+                throw new Error("FAROLINK_ROUTER_ADDRESS not configured in environment");
             }
 
             const poolAddr = hop.poolAddress ?? "";

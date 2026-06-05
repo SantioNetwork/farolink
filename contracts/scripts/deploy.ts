@@ -109,7 +109,7 @@ async function main() {
 
     console.log(`\n📄 Deployment saved to: ${outPath}`);
     console.log("\n── Add to your service .env files ─────────────────────────");
-    console.log(`PHAROS_FLOW_ROUTER_ADDRESS=${routerAddress}`);
+    console.log(`FAROLINK_ROUTER_ADDRESS=${routerAddress}`);
     console.log("────────────────────────────────────────────────────────────\n");
 }
 
