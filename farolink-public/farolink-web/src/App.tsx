@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Waves, Code2, FileText, Shield } from 'lucide-react';
+import { Code2, FileText, Shield } from 'lucide-react';
 import SwapWidget from './components/SwapWidget';
 import TransactionHistory from './components/TransactionHistory';
 import DeveloperDocs from './components/DeveloperDocs';
@@ -16,9 +16,9 @@ export default function App() {
             {/* ── Navbar ─────────────────────────────────────────────────── */}
             <nav className="navbar">
                 {/* Brand */}
-                <div className="navbar-brand">
-                    <div className="logo-icon">
-                        <Waves color="#fff" size={18} />
+                <div className="navbar-brand" style={{ cursor: 'pointer' }} onClick={() => setTab('swap')}>
+                    <div className="logo-icon" style={{ background: 'transparent' }}>
+                        <img src="/logo.png" alt="FaroLink Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     FaroLink
                 </div>
@@ -87,7 +87,7 @@ export default function App() {
             {/* ── Footer — Fix U1/U7 ─────────────────────────────────────── */}
             <footer className="app-footer">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-4)', fontSize: '0.8rem' }}>
-                    <Waves size={14} />
+                    <img src="/logo.png" alt="" style={{ width: 14, height: 14, objectFit: 'contain' }} />
                     <span>© 2026 FaroLink · Testnet</span>
                     <span style={{
                         padding: '2px 6px',
