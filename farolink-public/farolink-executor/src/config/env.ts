@@ -15,7 +15,7 @@ const envSchema = z.object({
   INTERNAL_SECRET: z.string().min(32, "INTERNAL_SECRET must be at least 32 chars"),
 
   // Router service URL — used for same-chain DEX path resolution
-  ROUTER_API_URL: z.string().url().optional().default("http://localhost:3000"),
+  ROUTER_API_URL: z.string().url().optional().default("http://localhost:3001"),
 
   // Bridge contract addresses (optional — adapters check these individually)
   LAYERZERO_ENDPOINT_ADDRESS: z.string().optional(),
